@@ -6,7 +6,7 @@ Low level internal utilities to be shared amongst Eleventy projects.
 
 ## ➡ [Documentation](https://www.11ty.dev/docs/)
 
-- Please star [this repo on GitHub](https://github.com/11ty/eleventy/)!
+- Please star [Eleventy on GitHub](https://github.com/11ty/eleventy/)!
 - Follow us on Twitter [@eleven_ty](https://twitter.com/eleven_ty)
 - Support [11ty on Open Collective](https://opencollective.com/11ty)
 - [11ty on npm](https://www.npmjs.com/org/11ty)
