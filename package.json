@@ -1,6 +1,6 @@
 {
   "name": "@11ty/eleventy-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Low level internal utilities to be shared amongst Eleventy projects",
   "main": "index.js",
   "scripts": {
@@ -35,6 +35,6 @@
     "normalize-path": "^3.0.0"
   },
   "devDependencies": {
-    "ava": "^4.0.1"
+    "ava": "^4.1.0"
   }
 }
