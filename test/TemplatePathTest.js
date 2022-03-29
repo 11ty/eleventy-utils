@@ -1,6 +1,6 @@
 const test = require("ava");
 const fs = require("fs");
-const TemplatePath = require("../src/TemplatePath");
+const { TemplatePath } = require("../");
 
 test("getDir", (t) => {
   t.is(TemplatePath.getDir("README.md"), ".");
