@@ -290,6 +290,8 @@ test("getExtension", (t) => {
   t.is(TemplatePath.getExtension("test/stubs"), "");
   t.is(TemplatePath.getExtension("test/stubs.njk"), "njk");
   t.is(TemplatePath.getExtension("test/stubs.hbs"), "hbs");
+  // Not normalized to template extension map
+  t.is(TemplatePath.getExtension("test/stubs.11ty.js"), "js");
 });
 
 test("removeExtension", (t) => {
