@@ -155,7 +155,7 @@ TemplatePath.absolutePath = function (...paths) {
 };
 
 /**
- * Turns an absolute path into a path relative Eleventy’s project directory.
+ * Turns an absolute path into a path relative to the project directory.
  *
  * @param {String} absolutePath
  * @returns {String} the relative path.
