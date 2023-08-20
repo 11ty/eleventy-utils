@@ -1,5 +1,6 @@
 const test = require("ava");
 const fs = require("fs");
+const path = require("path");
 const { TemplatePath } = require("../");
 
 test("getDir", (t) => {
@@ -345,4 +346,24 @@ test("exists", async (t) => {
   t.is(fs.existsSync("test"), true);
   t.is(fs.existsSync("test/stubs"), true);
   t.is(fs.existsSync("test/stubs/.eleventyignore"), true);
+});
+
+test("standardize", async (t) => {
+  t.is(TemplatePath.standardizeFilePath(""), "./");
+  t.is(TemplatePath.standardizeFilePath("."), "./");
+  t.is(TemplatePath.standardizeFilePath("./"), "./");
+  t.is(TemplatePath.standardizeFilePath("/"), "/");
+  t.is(TemplatePath.standardizeFilePath("/testing"), "/testing");
+  t.is(TemplatePath.standardizeFilePath("/testing/"), "/testing/");
+
+  t.is(TemplatePath.standardizeFilePath("./testing"), "./testing");
+
+  t.is(TemplatePath.standardizeFilePath("../"), "../");
+  t.is(TemplatePath.standardizeFilePath("../testing"), "../testing");
+
+  t.is(TemplatePath.standardizeFilePath("./testing/hello"), "./testing/hello");
+  t.is(TemplatePath.standardizeFilePath("./testing/hello/"), "./testing/hello/");
+
+  t.is(TemplatePath.standardizeFilePath(".htaccess"), "./.htaccess");
+  t.is(TemplatePath.standardizeFilePath(`${path.sep}Users${path.sep}test`), "/Users/test");
 });

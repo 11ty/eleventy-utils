@@ -113,8 +113,8 @@ TemplatePath.join = function (...paths) {
 
 /**
  * Joins the given URL path segments and normalizes the resulting path.
- * Maintains traling a single trailing slash if the last URL path argument
- * had atleast one.
+ * Maintains a single trailing slash if the last URL path argument
+ * had at least one.
  *
  * @param {String[]} urlPaths
  * @returns {String} a normalized URL path described by the given URL path segments.
@@ -351,6 +351,18 @@ TemplatePath.removeExtension = function (path, extension = undefined) {
  */
 TemplatePath.normalizeOperatingSystemFilePath = function (filePath, sep = "/") {
   return filePath.split(sep).join(path.sep);
+};
+
+/**
+ * Accepts a relative file path with the local operating system directory separator and
+ * normalizes it using a forward slash directory separator. (Leaves trailing slash as-is)
+ * e.g. `./my/dir/` stays `./my/dir/` on *nix and becomes `.\\my\\dir\\` on Windows
+ *
+ * @param {String} filePath
+ * @returns {String} a file path with the correct local directory separator.
+ */
+TemplatePath.standardizeFilePath = function (filePath, sep = "/") {
+  return TemplatePath.addLeadingDotSlash(filePath.split(path.sep).join(sep));
 };
 
 module.exports = TemplatePath;
