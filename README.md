@@ -26,4 +26,4 @@ npm install @11ty/eleventy-utils
 npm run test
 ```
 
-- We use the [ava JavaScript test runner](https://github.com/avajs/ava) ([Assertions documentation](https://github.com/avajs/ava/blob/master/docs/03-assertions.md))
+- We use the native NodeJS [test runner](https://nodejs.org/api/test.html#test-runner) and ([assertions](https://nodejs.org/api/assert.html#assert))
