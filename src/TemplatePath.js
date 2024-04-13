@@ -59,7 +59,7 @@ TemplatePath.getLastPathSegment = function (path) {
   // Trim a trailing slash if there is one
   path = path.replace(/\/$/, "");
 
-  return path.substr(path.lastIndexOf("/") + 1);
+  return path.substring(path.lastIndexOf("/") + 1);
 };
 
 /**
@@ -236,7 +236,7 @@ TemplatePath.stripLeadingSubPath = function (path, subPath) {
   subPath = TemplatePath.normalize(subPath);
 
   if (subPath !== "." && path.startsWith(subPath)) {
-    return path.substr(subPath.length + 1);
+    return path.substring(subPath.length + 1);
   }
 
   return path;
