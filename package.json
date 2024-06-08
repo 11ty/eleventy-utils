@@ -42,6 +42,6 @@
     "normalize-path": "^3.0.0"
   },
   "devDependencies": {
-    "ava": "^4.1.0"
+    "ava": "^6.1.3"
   }
 }
