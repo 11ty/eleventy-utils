@@ -260,7 +260,7 @@ test("String does not overrides parent key with object", (t) => {
 
 test("Merge with frozen target object fails", (t) => {
   t.throws(() => {
-    let b = Merge({
+    Merge({
       eleventy: Object.freeze({
         key1: "a"
       })
@@ -269,7 +269,6 @@ test("Merge with frozen target object fails", (t) => {
         key2: "b"
       }
     });
-		console.log( b.eleventy);
   });
 });
 
