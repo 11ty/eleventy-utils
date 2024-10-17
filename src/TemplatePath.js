@@ -1,5 +1,4 @@
 const path = require("path");
-const normalize = require("normalize-path");
 const fs = require("fs");
 
 function TemplatePath() {}
@@ -59,7 +58,7 @@ TemplatePath.getLastPathSegment = function (path) {
   // Trim a trailing slash if there is one
   path = path.replace(/\/$/, "");
 
-  return path.substr(path.lastIndexOf("/") + 1);
+  return path.slice(path.lastIndexOf("/") + 1);
 };
 
 /**
@@ -93,22 +92,25 @@ TemplatePath.getAllDirs = function (path) {
  * @returns {String} the normalized path.
  */
 TemplatePath.normalize = function (thePath) {
-  return normalize(path.normalize(thePath));
+  let filePath = path.normalize(thePath);
+  if(filePath !== path.sep && filePath.endsWith(path.sep)) {
+    return filePath.slice(0, -1 * path.sep.length);
+  }
+  return filePath;
 };
 
 /**
  * Joins all given path segments together.
  *
- * It uses Node.js’ [`path.join`][1] method and the [normalize-path][2] package.
+ * It uses Node.js’ [`path.join`][1] method.
  *
  * [1]: https://nodejs.org/api/path.html#path_path_join_paths
- * [2]: https://www.npmjs.com/package/normalize-path
  *
  * @param {String[]} paths An arbitrary amount of path segments.
  * @returns {String} the normalized and joined path.
  */
 TemplatePath.join = function (...paths) {
-  return normalize(path.join(...paths));
+  return TemplatePath.normalize(path.join(...paths));
 };
 
 /**
@@ -236,7 +238,7 @@ TemplatePath.stripLeadingSubPath = function (path, subPath) {
   subPath = TemplatePath.normalize(subPath);
 
   if (subPath !== "." && path.startsWith(subPath)) {
-    return path.substr(subPath.length + 1);
+    return path.slice(subPath.length + 1);
   }
 
   return path;

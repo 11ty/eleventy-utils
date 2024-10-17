@@ -38,9 +38,6 @@
   },
   "bugs": "https://github.com/11ty/eleventy-utils/issues",
   "homepage": "https://github.com/11ty/eleventy-utils/",
-  "dependencies": {
-    "normalize-path": "^3.0.0"
-  },
   "devDependencies": {
     "ava": "^6.1.3"
   }
