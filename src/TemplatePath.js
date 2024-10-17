@@ -93,7 +93,7 @@ TemplatePath.getAllDirs = function (path) {
  */
 TemplatePath.normalize = function (thePath) {
   let filePath = path.normalize(thePath).split(path.sep).join("/");
-  if(filePath !== path.sep && filePath.endsWith("/")) {
+  if(filePath !== "/" && filePath.endsWith("/")) {
     return filePath.slice(0, -1);
   }
   return filePath;
