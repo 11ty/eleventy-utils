@@ -2,7 +2,8 @@ const assert = require("node:assert/strict")
 const test = require("node:test");
 const fs = require("node:fs");
 const path = require("node:path");
-const { TemplatePath } = require("../");
+
+const { TemplatePath } = require("../index.js");
 
 test("getDir", (t) => {
   assert.equal(TemplatePath.getDir("README.md"), ".");

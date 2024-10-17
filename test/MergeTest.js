@@ -1,64 +1,66 @@
 "use strict";
 // above is required for Object.freeze to fail correctly.
 
-const test = require("ava");
+const assert = require("node:assert/strict")
+const test = require("node:test");
+
 const Merge = require("../src/Merge.js");
 const { DeepCopy } = Merge;
 
 test("Shallow Merge", (t) => {
-  t.deepEqual(Merge({}, {}), {});
-  t.deepEqual(Merge({ a: 1 }, { a: 2 }), { a: 2 });
-  t.deepEqual(Merge({ a: 1 }, { a: 2 }, undefined), { a: 2 });
-  t.deepEqual(Merge({ a: 1 }, { a: 2 }, { a: 3 }), { a: 3 });
+  assert.deepEqual(Merge({}, {}), {});
+  assert.deepEqual(Merge({ a: 1 }, { a: 2 }), { a: 2 });
+  assert.deepEqual(Merge({ a: 1 }, { a: 2 }, undefined), { a: 2 });
+  assert.deepEqual(Merge({ a: 1 }, { a: 2 }, { a: 3 }), { a: 3 });
 
-  t.deepEqual(Merge({ a: 1 }, { b: 1 }), { a: 1, b: 1 });
-  t.deepEqual(Merge({ a: 1 }, { b: 1 }, { c: 1 }), { a: 1, b: 1, c: 1 });
+  assert.deepEqual(Merge({ a: 1 }, { b: 1 }), { a: 1, b: 1 });
+  assert.deepEqual(Merge({ a: 1 }, { b: 1 }, { c: 1 }), { a: 1, b: 1, c: 1 });
 
-  t.deepEqual(Merge({ a: [1] }, { a: [2] }), { a: [1, 2] });
+  assert.deepEqual(Merge({ a: [1] }, { a: [2] }), { a: [1, 2] });
 });
 
 test("Doesn’t need to return", (t) => {
   var b = { a: 2 };
   Merge(b, { a: 1 });
-  t.deepEqual(b, { a: 1 });
+  assert.deepEqual(b, { a: 1 });
 });
 
 test("Invalid", (t) => {
-  t.deepEqual(Merge({}, 1), {});
-  t.deepEqual(Merge({}, [1]), {});
-  t.deepEqual(Merge({}, "string"), {});
+  assert.deepEqual(Merge({}, 1), {});
+  assert.deepEqual(Merge({}, [1]), {});
+  assert.deepEqual(Merge({}, "string"), {});
 });
 
 test("Non-Object target", (t) => {
-  t.deepEqual(Merge(1, { a: 1 }), { a: 1 });
-  t.deepEqual(Merge([1], { a: 1 }), { a: 1 });
-  t.deepEqual(Merge("string", { a: 1 }), { a: 1 });
+  assert.deepEqual(Merge(1, { a: 1 }), { a: 1 });
+  assert.deepEqual(Merge([1], { a: 1 }), { a: 1 });
+  assert.deepEqual(Merge("string", { a: 1 }), { a: 1 });
 });
 
 test("Deep", (t) => {
-  t.deepEqual(Merge({ a: { b: 1 } }, { a: { c: 1 } }), { a: { b: 1, c: 1 } });
-  t.deepEqual(Merge({ a: { b: 1 } }, { a: { c: 1 } }, undefined), {
+  assert.deepEqual(Merge({ a: { b: 1 } }, { a: { c: 1 } }), { a: { b: 1, c: 1 } });
+  assert.deepEqual(Merge({ a: { b: 1 } }, { a: { c: 1 } }, undefined), {
     a: { b: 1, c: 1 },
   });
 });
 
 test("Deep, override: prefix", (t) => {
-  t.deepEqual(Merge({ a: { b: [1, 2] } }, { a: { b: [3, 4] } }), {
+  assert.deepEqual(Merge({ a: { b: [1, 2] } }, { a: { b: [3, 4] } }), {
     a: { b: [1, 2, 3, 4] },
   });
-  t.deepEqual(Merge({ a: [1] }, { a: [2] }), { a: [1, 2] });
-  t.deepEqual(Merge({ a: [1] }, { "override:a": [2] }), { a: [2] });
-  t.deepEqual(Merge({ a: { b: [1, 2] } }, { a: { "override:b": [3, 4] } }), {
+  assert.deepEqual(Merge({ a: [1] }, { a: [2] }), { a: [1, 2] });
+  assert.deepEqual(Merge({ a: [1] }, { "override:a": [2] }), { a: [2] });
+  assert.deepEqual(Merge({ a: { b: [1, 2] } }, { a: { "override:b": [3, 4] } }), {
     a: { b: [3, 4] },
   });
 });
 
 test("Deep, override: prefix at root", (t) => {
-  t.deepEqual(Merge({ "override:a": [1] }, { a: [2] }), { a: [1, 2] });
+  assert.deepEqual(Merge({ "override:a": [1] }, { a: [2] }), { a: [1, 2] });
 });
 
 test("Deep, override: prefix at other placements", (t) => {
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         a: {
@@ -78,7 +80,7 @@ test("Deep, override: prefix at other placements", (t) => {
     }
   );
 
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         a: {
@@ -98,7 +100,7 @@ test("Deep, override: prefix at other placements", (t) => {
     }
   );
 
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         "override:a": {
@@ -118,7 +120,7 @@ test("Deep, override: prefix at other placements", (t) => {
     }
   );
 
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         a: {
@@ -139,7 +141,7 @@ test("Deep, override: prefix at other placements", (t) => {
     }
   );
 
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         a: {
@@ -167,7 +169,7 @@ test("Deep, override: prefix at other placements", (t) => {
 });
 
 test("Edge case from #2470", (t) => {
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         a: {
@@ -198,7 +200,7 @@ test("Edge case from #2470", (t) => {
 });
 
 test.skip("Edge case from #2684 (multiple conflicting override: props)", (t) => {
-  t.deepEqual(
+  assert.deepEqual(
     Merge(
       {
         a: {
@@ -226,25 +228,25 @@ test.skip("Edge case from #2684 (multiple conflicting override: props)", (t) => 
 });
 
 test("Deep, override: empty", (t) => {
-  t.deepEqual(Merge({}, { a: { b: [3, 4] } }), { a: { b: [3, 4] } });
-  t.deepEqual(Merge({}, { a: [2] }), { a: [2] });
-  t.deepEqual(Merge({}, { "override:a": [2] }), { a: [2] });
-  t.deepEqual(Merge({}, { a: { "override:b": [3, 4] } }), { a: { b: [3, 4] } });
+  assert.deepEqual(Merge({}, { a: { b: [3, 4] } }), { a: { b: [3, 4] } });
+  assert.deepEqual(Merge({}, { a: [2] }), { a: [2] });
+  assert.deepEqual(Merge({}, { "override:a": [2] }), { a: [2] });
+  assert.deepEqual(Merge({}, { a: { "override:b": [3, 4] } }), { a: { b: [3, 4] } });
 });
 
 test("DeepCopy", (t) => {
-  t.deepEqual(DeepCopy({}, { a: { b: [3, 4] } }), { a: { b: [3, 4] } });
-  t.deepEqual(DeepCopy({}, { a: [2] }), { a: [2] });
-  t.deepEqual(DeepCopy({}, { a: [2] }, undefined), { a: [2] });
-  t.deepEqual(DeepCopy({}, undefined, { a: [2] }), { a: [2] });
-  t.deepEqual(DeepCopy({}, { "override:a": [2] }), { "override:a": [2] });
-  t.deepEqual(DeepCopy({}, { a: { "override:b": [3, 4] } }), {
+  assert.deepEqual(DeepCopy({}, { a: { b: [3, 4] } }), { a: { b: [3, 4] } });
+  assert.deepEqual(DeepCopy({}, { a: [2] }), { a: [2] });
+  assert.deepEqual(DeepCopy({}, { a: [2] }, undefined), { a: [2] });
+  assert.deepEqual(DeepCopy({}, undefined, { a: [2] }), { a: [2] });
+  assert.deepEqual(DeepCopy({}, { "override:a": [2] }), { "override:a": [2] });
+  assert.deepEqual(DeepCopy({}, { a: { "override:b": [3, 4] } }), {
     a: { "override:b": [3, 4] },
   });
 });
 
 test("String does not overrides parent key with object", (t) => {
-  t.deepEqual(Merge({
+  assert.deepEqual(Merge({
     eleventy: {
       key1: "a"
     }
@@ -258,8 +260,8 @@ test("String does not overrides parent key with object", (t) => {
   });
 });
 
-test("Merge with frozen target object fails", (t) => {
-  t.throws(() => {
+test("Merge with frozen target object fails", () => {
+  try {
     Merge({
       eleventy: Object.freeze({
         key1: "a"
@@ -269,11 +271,13 @@ test("Merge with frozen target object fails", (t) => {
         key2: "b"
       }
     });
-  });
+  } catch(e) {
+    assert.equal(true, true);
+  }
 });
 
 test("Merge with frozen source object (1 level deep) succeeds", (t) => {
-  t.deepEqual(Merge({
+  assert.deepEqual(Merge({
   }, {
     eleventy: Object.freeze({
       key2: "b"
@@ -287,7 +291,7 @@ test("Merge with frozen source object (1 level deep) succeeds", (t) => {
 
 
 test("Merge with frozen source object (1 level deep, mixed) succeeds", (t) => {
-  t.deepEqual(Merge({
+  assert.deepEqual(Merge({
     eleventy: {
       key1: "a"
     }
