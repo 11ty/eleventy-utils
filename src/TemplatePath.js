@@ -14,7 +14,7 @@ TemplatePath.getWorkingDir = function () {
  * Returns the directory portion of a path.
  * Works for directory and file paths and paths ending in a glob pattern.
  *
- * @param {String} path A path
+ * @param {String} path - A path
  * @returns {String} the directory portion of a path.
  */
 TemplatePath.getDir = function (path) {
@@ -33,8 +33,8 @@ TemplatePath.getDir = function (path) {
  *
  * [1]: https://nodejs.org/api/path.html#path_path_parse_path
  *
- * @param {String} path A path
  * @returns {String} the directory portion of a path.
+ * @param {String} filePath - A path
  */
 TemplatePath.getDirFromFilePath = function (filePath) {
   return path.parse(filePath).dir || ".";
@@ -47,7 +47,7 @@ TemplatePath.getDirFromFilePath = function (filePath) {
  *
  * [1]: https://nodejs.org/api/path.html#path_path_parse_path
  *
- * @param {String} path A path
+ * @param {String} path - A path
  * @returns {String} the last path segment in a path
  */
 TemplatePath.getLastPathSegment = function (path) {
@@ -62,7 +62,7 @@ TemplatePath.getLastPathSegment = function (path) {
 };
 
 /**
- * @param {String} path A path
+ * @param {String} path - A path
  * @returns {String[]} an array of paths pointing to each path segment of the
  * provided `path`.
  */
@@ -88,7 +88,7 @@ TemplatePath.getAllDirs = function (path) {
  *
  * [1]: https://nodejs.org/api/path.html#path_path_normalize_path
  *
- * @param {String} thePath The path that should be normalized.
+ * @param {String} thePath - The path that should be normalized.
  * @returns {String} the normalized path.
  */
 TemplatePath.normalize = function (thePath) {
@@ -106,7 +106,7 @@ TemplatePath.normalize = function (thePath) {
  *
  * [1]: https://nodejs.org/api/path.html#path_path_join_paths
  *
- * @param {String[]} paths An arbitrary amount of path segments.
+ * @param {...String} paths - An arbitrary amount of path segments.
  * @returns {String} the normalized and joined path.
  */
 TemplatePath.join = function (...paths) {
@@ -118,7 +118,7 @@ TemplatePath.join = function (...paths) {
  * Maintains a single trailing slash if the last URL path argument
  * had at least one.
  *
- * @param {String[]} urlPaths
+ * @param {...String} urlPaths
  * @returns {String} a normalized URL path described by the given URL path segments.
  */
 TemplatePath.normalizeUrlPath = function (...urlPaths) {
@@ -130,7 +130,7 @@ TemplatePath.normalizeUrlPath = function (...urlPaths) {
  * Joins the given path segments. Since the first path is absolute,
  * the resulting path will be absolute as well.
  *
- * @param {String[]} paths
+ * @param {...String} paths
  * @returns {String} the absolute path described by the given path segments.
  */
 TemplatePath.absolutePath = function (...paths) {
@@ -182,7 +182,7 @@ TemplatePath.addLeadingDotSlashArray = function (paths) {
 /**
  * Adds a leading dot-slash segment to `path`.
  *
- * @param {String} path
+ * @param {String} pathArg
  * @returns {String}
  */
 TemplatePath.addLeadingDotSlash = function (pathArg) {
@@ -214,8 +214,8 @@ TemplatePath.stripLeadingDotSlash = function (path) {
 /**
  * Determines whether a path starts with a given sub path.
  *
- * @param {String} path A path
- * @param {String} subPath A path
+ * @param {String} path - A path
+ * @param {String} subPath - A path
  * @returns {Boolean} whether `path` starts with `subPath`.
  */
 TemplatePath.startsWithSubPath = function (path, subPath) {
@@ -229,8 +229,8 @@ TemplatePath.startsWithSubPath = function (path, subPath) {
  * Removes the `subPath` at the start of `path` if present
  * and returns the remainding path.
  *
- * @param {String} path A path
- * @param {String} subPath A path
+ * @param {String} path - A path
+ * @param {String} subPath - A path
  * @returns {String} the `path` without `subPath` at the start of it.
  */
 TemplatePath.stripLeadingSubPath = function (path, subPath) {
@@ -245,7 +245,7 @@ TemplatePath.stripLeadingSubPath = function (path, subPath) {
 };
 
 /**
- * @param {String} path A path
+ * @param {String} path - A path
  * @returns {Boolean} whether `path` points to an existing directory.
  */
 TemplatePath.isDirectorySync = function (path) {
@@ -253,7 +253,7 @@ TemplatePath.isDirectorySync = function (path) {
 };
 
 /**
- * @param {String} path A path
+ * @param {String} path - A path
  * @returns {Boolean} whether `path` points to an existing directory.
  */
 TemplatePath.isDirectory = async function (path) {
@@ -327,7 +327,7 @@ TemplatePath.getExtension = function (thePath) {
  * Removes the extension from a path.
  *
  * @param {String} path
- * @param {String} extension
+ * @param {String} [extension]
  * @returns {String}
  */
 TemplatePath.removeExtension = function (path, extension = undefined) {
@@ -349,6 +349,7 @@ TemplatePath.removeExtension = function (path, extension = undefined) {
  * e.g. `./my/dir/` stays `./my/dir/` on *nix and becomes `.\\my\\dir\\` on Windows
  *
  * @param {String} filePath
+ * @param {String} [sep="/"]
  * @returns {String} a file path with the correct local directory separator.
  */
 TemplatePath.normalizeOperatingSystemFilePath = function (filePath, sep = "/") {
@@ -361,6 +362,7 @@ TemplatePath.normalizeOperatingSystemFilePath = function (filePath, sep = "/") {
  * e.g. `./my/dir/` stays `./my/dir/` on *nix and becomes `.\\my\\dir\\` on Windows
  *
  * @param {String} filePath
+ * @param {String} [sep="/"]
  * @returns {String} a file path with the correct local directory separator.
  */
 TemplatePath.standardizeFilePath = function (filePath, sep = "/") {
