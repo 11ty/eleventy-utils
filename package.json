@@ -11,7 +11,8 @@
     "!test/**"
   ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "watch": "node --test --watch"
   },
   "license": "MIT",
   "engines": {
