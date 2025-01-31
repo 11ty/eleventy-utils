@@ -1,9 +1,7 @@
 class DateCompare {
 	static isTimestampWithinDuration(timestamp, duration, compareDate = Date.now()) {
-		// in the cache and no duration
+		// the default duration is Infinity (also "*")
 		if (!duration || duration === "*" || duration === Infinity) {
-			// no duration specified (plugin default is 1d, but if this is falsy assume infinite)
-			// "*" is infinite duration
 			return true;
 		}
 
