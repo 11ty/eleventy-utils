@@ -359,7 +359,8 @@ TemplatePath.normalizeOperatingSystemFilePath = function (filePath, sep = "/") {
 /**
  * Accepts a relative file path with the local operating system directory separator and
  * normalizes it using a forward slash directory separator. (Leaves trailing slash as-is)
- * e.g. `./my/dir/` stays `./my/dir/` on *nix and becomes `.\\my\\dir\\` on Windows
+ * e.g. `./my/dir/` stays `./my/dir/` on *nix
+ * e.g. `.\\my\\dir\\` becomes `./my/dir/` on *nix and Windows
  *
  * @param {String} filePath
  * @param {String} [sep="/"]
