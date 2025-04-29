@@ -4,6 +4,7 @@ const Merge = require("./src/Merge.js");
 const DateCompare = require("./src/DateCompare.js");
 const { DeepCopy } = Merge;
 const createHash = require("./src/CreateHash.js");
+const Buffer = require("./src/Buffer.js");
 
 module.exports = {
   TemplatePath,
@@ -12,4 +13,5 @@ module.exports = {
   DeepCopy,
   DateCompare,
   createHash,
+  Buffer,
 };

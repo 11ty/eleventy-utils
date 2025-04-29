@@ -1,5 +1,6 @@
 
 const { base64UrlSafe } = require("./Url.js");
+const { isBuffer } = require("./Buffer.js");
 
 function toBase64(bytes) {
 	let str = Array.from(bytes, (b) => String.fromCodePoint(b)).join("");
@@ -34,7 +35,12 @@ module.exports = async function createHash(...content) {
 	}
 
 	let encoder = new TextEncoder();
-	let input = mergeUint8Array(...content.map(c => encoder.encode(c)))
+	let input = mergeUint8Array(...content.map(c => {
+		if(isBuffer(c)) {
+			return c;
+		}
+		return encoder.encode(c);
+	}));
 
 	// `crypto` is Node 20+
 	return crypto.subtle.digest("SHA-256", input).then(hashBuffer => {

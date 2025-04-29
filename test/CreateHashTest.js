@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict")
 const test = require("node:test");
+const fs = require("node:fs");
 
 const createHash = require("../src/CreateHash.js");
 const createHashNodeCrypto = require("../src/CreateHash-Node.js");
@@ -20,4 +21,9 @@ test("Multiple calls", async (t) => {
 	assert.equal(await createHash("a", "b"), createHashNodeCrypto("a", "b"));
 	assert.equal(await createHash("a", "b", "c"), createHashNodeCrypto("a", "b", "c"));
 	assert.equal(await createHash("abcdef", "def"), createHashNodeCrypto("abcdef", "def"));
+});
+
+test("Multiple calls, Buffer", async (t) => {
+	let buffer = fs.readFileSync("./test/stubs/sample.png");
+	assert.equal(await createHash(buffer, "def"), createHashNodeCrypto(buffer, "def"));
 });
