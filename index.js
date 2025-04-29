@@ -3,7 +3,7 @@ const isPlainObject = require("./src/IsPlainObject.js");
 const Merge = require("./src/Merge.js");
 const DateCompare = require("./src/DateCompare.js");
 const { DeepCopy } = Merge;
-const createHash = require("./src/CreateHash.js");
+const { createHash, createHashHex } = require("./src/CreateHash.js");
 const Buffer = require("./src/Buffer.js");
 
 module.exports = {
@@ -13,5 +13,6 @@ module.exports = {
   DeepCopy,
   DateCompare,
   createHash,
+  createHashHex,
   Buffer,
 };
