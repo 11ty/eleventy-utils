@@ -1,46 +1,43 @@
-// WebCrypto (crypto global) not available in Node 18.
-function createHashNodeCrypto(content) {
-	// require only when necessary
-	const { createHash } = require("node:crypto");
 
-	let hash = createHash("sha256");
-	hash.update(content);
-
-	// Note that Node does include a `digest("base64url")` that is supposedly Node 14+ but curiously failed on Stackblitz’s Node 16.
-	let base64 = hash.digest("base64");
-	return urlSafe(base64);
-}
-
-function urlSafe(hashString = "") {
-	return hashString.replace(/[=\+\/]/g, function(match) {
-		if(match === "=") {
-			return "";
-		}
-		if(match === "+") {
-			return "-";
-		}
-		return "_";
-	});
-}
+const { base64UrlSafe } = require("./Url.js");
 
 function toBase64(bytes) {
 	let str = Array.from(bytes, (b) => String.fromCodePoint(b)).join("");
-	// `btoa` is Node 16+
+
+	// `btoa` Node 16+
 	return btoa(str);
 }
 
+// Thanks https://evanhahn.com/the-best-way-to-concatenate-uint8arrays/ (Public domain)
+function mergeUint8Array(...arrays) {
+  let totalLength = arrays.reduce(
+    (total, uint8array) => total + uint8array.byteLength,
+    0
+  );
+
+  let result = new Uint8Array(totalLength);
+  let offset = 0;
+  arrays.forEach((uint8array) => {
+    result.set(uint8array, offset);
+    offset += uint8array.byteLength;
+  });
+
+  return result;
+}
+
 // same output as node:crypto above (though now async).
-module.exports = async function createHash(content) {
+module.exports = async function createHash(...content) {
 	if(typeof globalThis.crypto === "undefined") {
 		// Backwards compat with Node Crypto, since WebCrypto (crypto global) is Node 20+
-		return createHashNodeCrypto(content);
+		const createHashNodeCrypto = require("./CreateHash-Node.js");
+		return createHashNodeCrypto(...content);
 	}
 
 	let encoder = new TextEncoder();
-	let data = encoder.encode(content);
+	let input = mergeUint8Array(...content.map(c => encoder.encode(c)))
 
 	// `crypto` is Node 20+
-	return crypto.subtle.digest("SHA-256", data).then(hashBuffer => {
-		return urlSafe(toBase64(new Uint8Array(hashBuffer)));
+	return crypto.subtle.digest("SHA-256", input).then(hashBuffer => {
+		return base64UrlSafe(toBase64(new Uint8Array(hashBuffer)));
 	});
 }
