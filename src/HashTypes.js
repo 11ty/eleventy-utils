@@ -1,11 +1,10 @@
 const { base64UrlSafe } = require("./Url.js");
 const { isBuffer } = require("./Buffer.js");
 const sha256 = require("../lib/sha256.js");
-const { createHash: createHashNode } = require("node:crypto");
 
 function hasNodeCryptoModule() {
 	try {
-		require("node:module");
+		require("node:crypto");
 		return true;
 	} catch(e) {
 		return false;
@@ -106,7 +105,9 @@ class WebCryptoHash extends Hash {
 
 class NodeCryptoHash extends Hash {
 	static toHash(...content) {
-		let hash = createHashNode("sha256");
+		// This *needs* to be a dynamic require for proper bundling.
+		const { createHash } = require("node:crypto");
+		let hash = createHash("sha256");
 
 		for(let c of content) {
 			hash.update(c);
