@@ -1,6 +1,6 @@
 const { base64UrlSafe } = require("./Url.js");
 const { isBuffer } = require("./Buffer.js");
-const sha256 = require("../lib/sha256.js");
+const sha256 = require("./lib-sha256.js");
 
 function hasNodeCryptoModule() {
 	try {
