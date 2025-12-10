@@ -1,0 +1,35 @@
+{
+  "name": "@11ty/eleventy-utils",
+  "version": "2.0.7",
+  "description": "Low level internal utilities to be shared amongst Eleventy projects",
+  "main": "index.js",
+  "files": [
+    "src",
+    "src/**",
+    "index.js"
+  ],
+  "scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/11ty"
+  },
+  "keywords": [
+    "eleventy"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Zach Leatherman <zach@zachleat.com> (https://zachleat.com/)",
+  "repository": {
+		"type": "git",
+		"url": "git+https://github.com/11ty/eleventy-utils.git"
+	},
+  "bugs": "https://github.com/11ty/eleventy-utils/issues",
+  "homepage": "https://www.11ty.dev/"
+}

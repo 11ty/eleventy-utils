@@ -19,7 +19,9 @@ jobs:
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npm test
-      - if: ${{ github.event.release.tag_name != '' && env.NPM_PUBLISH_TAG != '' }}
-        run: npm publish --provenance --access=public --tag=${{ env.NPM_PUBLISH_TAG }}
+      - if: ${{ github.event.release.tag_name != '' && env.NPM_PUBLISH_TAG != '' && env.NPM_WORKSPACE != '' }}
+        run: npm publish --provenance --access=public --tag=${{ env.NPM_PUBLISH_TAG }} --workspace=${{ env.NPM_WORKSPACE }}
         env:
           NPM_PUBLISH_TAG: ${{ contains(github.event.release.tag_name, '-alpha.') && 'canary' || 'latest' }}
+          # tag names must be formatted like utils@1.0.0
+          NPM_WORKSPACE: ${{ startsWith(github.event.release.tag_name, 'utils@') && 'utils' }}

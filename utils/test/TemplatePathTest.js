@@ -250,20 +250,20 @@ test("convertToRecursiveGlobSync", (t) => {
   assert.equal(TemplatePath.convertToRecursiveGlobSync("."), "./**");
   assert.equal(TemplatePath.convertToRecursiveGlobSync("./"), "./**");
   assert.equal(
-    TemplatePath.convertToRecursiveGlobSync("test/stubs"),
-    "./test/stubs/**"
+    TemplatePath.convertToRecursiveGlobSync("utils/test/stubs"),
+    "./utils/test/stubs/**"
   );
   assert.equal(
-    TemplatePath.convertToRecursiveGlobSync("test/stubs/"),
-    "./test/stubs/**"
+    TemplatePath.convertToRecursiveGlobSync("utils/test/stubs/"),
+    "./utils/test/stubs/**"
   );
   assert.equal(
-    TemplatePath.convertToRecursiveGlobSync("./test/stubs/"),
-    "./test/stubs/**"
+    TemplatePath.convertToRecursiveGlobSync("./utils/test/stubs/"),
+    "./utils/test/stubs/**"
   );
   assert.equal(
-    TemplatePath.convertToRecursiveGlobSync("./test/stubs/config.js"),
-    "./test/stubs/config.js"
+    TemplatePath.convertToRecursiveGlobSync("./utils/test/stubs/config.js"),
+    "./utils/test/stubs/config.js"
   );
 });
 
@@ -272,20 +272,20 @@ test("convertToRecursiveGlob", async (t) => {
   assert.equal(await TemplatePath.convertToRecursiveGlob("."), "./**");
   assert.equal(await TemplatePath.convertToRecursiveGlob("./"), "./**");
   assert.equal(
-    await TemplatePath.convertToRecursiveGlob("test/stubs"),
-    "./test/stubs/**"
+    await TemplatePath.convertToRecursiveGlob("utils/test/stubs"),
+    "./utils/test/stubs/**"
   );
   assert.equal(
-    await TemplatePath.convertToRecursiveGlob("test/stubs/"),
-    "./test/stubs/**"
+    await TemplatePath.convertToRecursiveGlob("utils/test/stubs/"),
+    "./utils/test/stubs/**"
   );
   assert.equal(
-    await TemplatePath.convertToRecursiveGlob("./test/stubs/"),
-    "./test/stubs/**"
+    await TemplatePath.convertToRecursiveGlob("./utils/test/stubs/"),
+    "./utils/test/stubs/**"
   );
   assert.equal(
-    await TemplatePath.convertToRecursiveGlob("./test/stubs/config.js"),
-    "./test/stubs/config.js"
+    await TemplatePath.convertToRecursiveGlob("./utils/test/stubs/config.js"),
+    "./utils/test/stubs/config.js"
   );
 });
 
@@ -332,23 +332,23 @@ test("removeExtension", (t) => {
 
 test("isDirectorySync", (t) => {
   assert.equal(TemplatePath.isDirectorySync("asdlkfjklsadjflkja"), false);
-  assert.equal(TemplatePath.isDirectorySync("test"), true);
-  assert.equal(TemplatePath.isDirectorySync("test/stubs"), true);
-  assert.equal(TemplatePath.isDirectorySync("test/stubs/.eleventyignore"), false);
+  assert.equal(TemplatePath.isDirectorySync("utils/test"), true);
+  assert.equal(TemplatePath.isDirectorySync("utils/test/stubs"), true);
+  assert.equal(TemplatePath.isDirectorySync("utils/test/stubs/.eleventyignore"), false);
 });
 
 test("isDirectory", async (t) => {
   assert.equal(await TemplatePath.isDirectory("asdlkfjklsadjflkja"), false);
-  assert.equal(await TemplatePath.isDirectory("test"), true);
-  assert.equal(await TemplatePath.isDirectory("test/stubs"), true);
-  assert.equal(await TemplatePath.isDirectory("test/stubs/.eleventyignore"), false);
+  assert.equal(await TemplatePath.isDirectory("utils/test"), true);
+  assert.equal(await TemplatePath.isDirectory("utils/test/stubs"), true);
+  assert.equal(await TemplatePath.isDirectory("utils/test/stubs/.eleventyignore"), false);
 });
 
 test("exists", async (t) => {
-  assert.equal(fs.existsSync("asdlkfjklsadjflkja"), false);
-  assert.equal(fs.existsSync("test"), true);
-  assert.equal(fs.existsSync("test/stubs"), true);
-  assert.equal(fs.existsSync("test/stubs/.eleventyignore"), true);
+  assert.equal(fs.existsSync("utils/asdlkfjklsadjflkja"), false);
+  assert.equal(fs.existsSync("utils/test"), true);
+  assert.equal(fs.existsSync("utils/test/stubs"), true);
+  assert.equal(fs.existsSync("utils/test/stubs/.eleventyignore"), true);
 });
 
 test("standardize", async (t) => {

@@ -66,12 +66,12 @@ if(typeof globalThis.crypto !== "undefined") {
 	});
 
 	test("Multiple calls give the same output, Buffer  (WebCrypto <-> Node)", async (t) => {
-		let buffer = fs.readFileSync("./test/stubs/sample.png");
+		let buffer = fs.readFileSync("./utils/test/stubs/sample.png");
 		assert.equal(await WebCryptoHash.toBase64Url(buffer, "def"), NodeCryptoHash.toBase64Url(buffer, "def"));
 	});
 
 	test("Multiple calls give the same output, Buffer  (WebCrypto <-> Node; hex)", async (t) => {
-		let buffer = fs.readFileSync("./test/stubs/sample.png");
+		let buffer = fs.readFileSync("./utils/test/stubs/sample.png");
 		assert.equal(await WebCryptoHash.toHex(buffer, "def"), NodeCryptoHash.toHex(buffer, "def"));
 	});
 
@@ -92,12 +92,12 @@ if(typeof globalThis.crypto !== "undefined") {
 	});
 
 	test("Multiple calls give the same output, Buffer  (WebCrypto <-> Script)", async (t) => {
-		let buffer = fs.readFileSync("./test/stubs/sample.png");
+		let buffer = fs.readFileSync("./utils/test/stubs/sample.png");
 		assert.equal(await WebCryptoHash.toBase64Url(buffer, "def"), ScriptHash.toBase64Url(buffer, "def"));
 	});
 
 	test("Multiple calls give the same output, Buffer  (WebCrypto <-> Script; hex)", async (t) => {
-		let buffer = fs.readFileSync("./test/stubs/sample.png");
+		let buffer = fs.readFileSync("./utils/test/stubs/sample.png");
 		assert.equal(await WebCryptoHash.toHex(buffer, "def"), ScriptHash.toHex(buffer, "def"));
 	});
 }
@@ -119,11 +119,11 @@ test("Multiple calls give the same output (Node <-> Script; hex)", async (t) => 
 });
 
 test("Multiple calls give the same output, Buffer  (Node <-> Script)", async (t) => {
-	let buffer = fs.readFileSync("./test/stubs/sample.png");
+	let buffer = fs.readFileSync("./utils/test/stubs/sample.png");
 	assert.equal(NodeCryptoHash.toBase64Url(buffer, "def"), ScriptHash.toBase64Url(buffer, "def"));
 });
 
 test("Multiple calls give the same output, Buffer  (Node <-> Script; hex)", async (t) => {
-	let buffer = fs.readFileSync("./test/stubs/sample.png");
+	let buffer = fs.readFileSync("./utils/test/stubs/sample.png");
 	assert.equal(NodeCryptoHash.toHex(buffer, "def"), ScriptHash.toHex(buffer, "def"));
 });
