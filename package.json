@@ -1,7 +1,8 @@
 {
 	"private": true,
 	"workspaces": [
-		"utils"
+		"utils",
+    "node-version-check"
 	],
 	"scripts": {
     "test": "node --test",

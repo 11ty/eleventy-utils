@@ -24,4 +24,4 @@ jobs:
         env:
           NPM_PUBLISH_TAG: ${{ contains(github.event.release.tag_name, '-alpha.') && 'canary' || 'latest' }}
           # tag names must be formatted like utils@1.0.0
-          NPM_WORKSPACE: ${{ startsWith(github.event.release.tag_name, 'utils@') && 'utils' }}
+          NPM_WORKSPACE: ${{ startsWith(github.event.release.tag_name, 'utils@') && 'utils' || startsWith(github.event.release.tag_name, 'node-version-check@') && 'node-version-check' }}
