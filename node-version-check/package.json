@@ -1,6 +1,6 @@
 {
   "name": "@11ty/node-version-check",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Show a friendly error message when using an incompatible with Node version",
   "main": "index.js",
   "files": ["index.js"],
