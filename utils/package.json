@@ -4,7 +4,6 @@
   "description": "Low level internal utilities to be shared amongst Eleventy projects",
   "main": "index.js",
   "files": [
-    "src",
     "src/**",
     "index.js"
   ],
