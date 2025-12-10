@@ -14,23 +14,31 @@ function cleanKey(key, prefix) {
 
 function getMergedItem(target, source, prefixes = {}) {
 	let { override } = prefixes;
+	
+	let sourcePlainObjectShortcut = isPlainObject(source);
+	let targetPlainObjectShortcut = false;
 
-	// Shortcut for frozen source (if target does not exist)
-	if (!target && isPlainObject(source) && Object.isFrozen(source)) {
-		return source;
-	}
+	if(!target) {
+		// Array too
+		if(Object.isFrozen(source)) {
+			// Shortcut for frozen source (if target does not exist)
+			return source;
+		}
 
-	let sourcePlainObjectShortcut;
-	if (!target && isPlainObject(source)) {
-		// deep copy objects to avoid sharing and to effect key renaming
-		target = {};
-		sourcePlainObjectShortcut = true;
+		if (sourcePlainObjectShortcut) {
+			targetPlainObjectShortcut = true;
+
+			// deep copy objects to avoid sharing and to effect key renaming
+			target = {};
+		}
 	}
 
 	if (Array.isArray(target) && Array.isArray(source)) {
 		return target.concat(source);
-	} else if (isPlainObject(target)) {
-		if (sourcePlainObjectShortcut || isPlainObject(source)) {
+	}
+
+	if (targetPlainObjectShortcut || isPlainObject(target)) {
+		if (sourcePlainObjectShortcut) {
 			for (let key in source) {
 				let overrideKey = cleanKey(key, override);
 
@@ -40,6 +48,7 @@ function getMergedItem(target, source, prefixes = {}) {
 		}
 		return target;
 	}
+
 	// number, string, class instance, etc
 	return source;
 }

@@ -31,6 +31,10 @@ test("Invalid", (t) => {
   assert.deepEqual(Merge({}, "string"), {});
 });
 
+test("Merge arrays", (t) => {
+  assert.deepEqual(Merge([1],[2, 3]), [1,2,3]);
+});
+
 test("Non-Object target", (t) => {
   assert.deepEqual(Merge(1, { a: 1 }), { a: 1 });
   assert.deepEqual(Merge([1], { a: 1 }), { a: 1 });
@@ -271,6 +275,9 @@ test("Merge with frozen target object fails", () => {
         key2: "b"
       }
     });
+
+    // fail on purpose
+    assert.equal(true, false);
   } catch(e) {
     assert.equal(true, true);
   }
@@ -305,4 +312,28 @@ test("Merge with frozen source object (1 level deep, mixed) succeeds", (t) => {
       key2: "b",
     }
   });
+});
+
+test("Merge with frozen array source succeeds", (t) => {
+  assert.deepEqual(Merge({
+  }, {
+    arr: Object.freeze([1, 2, 3])
+  }), {
+    arr: [1,2,3]
+  });
+});
+
+test("Merge with frozen array target fails", (t) => {
+  try {
+    Merge({
+      arr: Object.freeze([1, 2, 3])
+    }, {
+      arr: [4,5,6]
+    });
+
+    // fail on purpose
+    assert.equal(true, false);
+  } catch(e) {
+    assert.equal(true, true);
+  }
 });
