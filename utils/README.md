@@ -18,10 +18,4 @@ Low level internal utilities to be shared amongst Eleventy projects.
 npm install @11ty/eleventy-utils
 ```
 
-## Tests
-
-```
-npm run test
-```
-
-- We use the native NodeJS [test runner](https://nodejs.org/api/test.html#test-runner) and ([assertions](https://nodejs.org/api/assert.html#assert))
+- [`@11ty/eleventy-utils` on npm](https://www.npmjs.com/package/@11ty/eleventy-utils)
