@@ -3,6 +3,7 @@
 # 11ty Ecosystem Utilities
 
 - [`@11ty/eleventy-utils` in `utils/`](./utils/README.md)
+- [`@11ty/node-version-check` in `node-version-check/`](./node-version-check/README.md)
 
 ## Tests
 
