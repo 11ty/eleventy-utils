@@ -1,4 +1,4 @@
-# `dependency-tree-esm`
+# `@11ty/dependency-tree-esm`
 
 Returns an unordered array of local paths to dependencies of a Node ES module JavaScript file.
 
