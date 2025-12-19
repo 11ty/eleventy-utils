@@ -22,10 +22,8 @@
   "bugs": "https://github.com/11ty/eleventy-utils/issues",
   "homepage": "https://www.11ty.dev/",
   "dependencies": {
-    "@11ty/eleventy-utils": "^2.0.7",
+    "@11ty/dependency-tree-esm": "^2.0.4",
     "@sveltejs/acorn-typescript": "^1.0.8",
-    "acorn": "^8.15.0",
-    "dependency-graph": "^1.0.0",
-    "normalize-path": "^3.0.0"
+    "acorn": "^8.15.0"
   }
 }

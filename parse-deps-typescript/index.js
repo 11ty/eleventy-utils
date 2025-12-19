@@ -1,142 +1,17 @@
-import path from "node:path";
-import { readFileSync, existsSync } from "node:fs";
-
+import { find as findEsm, findGraph as findGraphEsm } from "@11ty/dependency-tree-esm";
 import { Parser } from "acorn";
 import { tsPlugin } from "@sveltejs/acorn-typescript";
-import normalizePath from "normalize-path";
-import { TemplatePath } from "@11ty/eleventy-utils";
-import { DepGraph } from "dependency-graph";
 
-// Is *not* a bare specifier (e.g. 'some-package')
-// https://nodejs.org/dist/latest-v18.x/docs/api/esm.html#terminology
-function isNonBareSpecifier(importSource) {
-	// Change \\ to / on Windows
-	let normalized = normalizePath(importSource);
-	// Relative specifier (e.g. './startup.js')
-	if(normalized.startsWith("./") || normalized.startsWith("../")) {
-		return true;
-	}
-	// Absolute specifier (e.g. 'file:///opt/nodejs/config.js')
-	if(normalized.startsWith("file:")) {
-		return true;
-	}
+export { mergeGraphs } from "@11ty/dependency-tree-esm";
 
-	return false;
+export async function find(filePath) {
+	return findEsm(filePath, {
+		parserOverride: Parser.extend(tsPlugin()),
+	})
 }
 
-function normalizeFilePath(filePath) {
-	return TemplatePath.standardizeFilePath(path.relative(".", filePath));
-}
-
-function normalizeImportSourceToFilePath(filePath, source) {
-	let { dir } = path.parse(filePath);
-	let normalized = path.join(dir, source);
-	return normalizeFilePath(normalized);
-}
-
-function getImportAttributeType(attributes = []) {
-	for(let node of attributes) {
-		if(node.type === "ImportAttribute" && node.key.type === "Identifier" && node.key.name === "type") {
-			return node.value.value;
-		}
-	}
-}
-
-async function getSources(filePath, contents) {
-	let sources = new Set();
-	let sourcesToRecurse = new Set();
-	let ast = Parser.extend(tsPlugin()).parse(contents, {sourceType: "module", ecmaVersion: "latest"});
-
-	for(let node of ast.body) {
-		if(node.type === "ImportDeclaration" && isNonBareSpecifier(node.source.value)) {
-			let importAttributeType = getImportAttributeType(node?.attributes);
-			let normalized = normalizeImportSourceToFilePath(filePath, node.source.value);
-			if(normalized !== filePath) {
-				sources.add(normalized);
-
-				// Recurse typeless (JavaScript) import types only
-				// Right now only `css` and `json` are valid but others might come later
-				if(!importAttributeType) {
-					sourcesToRecurse.add(normalized);
-				}
-			}
-		}
-	}
-
-	
-	return {
-		sources,
-		sourcesToRecurse,
-	}
-}
-
-export async function find(filePath, alreadyParsedSet = new Set()) {
-	// TODO add a cache here
-	// Unfortunately we need to read the entire file, imports need to be at the top level but they can be anywhere 🫠
-	let normalized = normalizeFilePath(filePath);
-	if(alreadyParsedSet.has(normalized) || !existsSync(filePath)) {
-		return [];
-	}
-	alreadyParsedSet.add(normalized);
-
-	let contents = readFileSync(normalized, { encoding: 'utf8' });
-	let { sources, sourcesToRecurse } = await getSources(filePath, contents);
-
-	// Recurse for nested deps
-	for(let source of sourcesToRecurse) {
-		let s = await find(source, alreadyParsedSet);
-		for(let p of s) {
-			if(sources.has(p) || p === filePath) {
-				continue;
-			}
-
-			sources.add(p);
-		}
-	}
-
-	return Array.from(sources);
-}
-
-export function mergeGraphs(rootGraph, ...graphs) {
-	if(!(rootGraph instanceof DepGraph)) {
-		throw new Error("Incorrect type passed to mergeGraphs, expected DepGraph");
-	}
-	for(let g of graphs) {
-		for(let node of g.overallOrder()) {
-			if(!rootGraph.hasNode(node)) {
-				rootGraph.addNode(node);
-			}
-			for(let dep of g.directDependenciesOf(node)) {
-				rootGraph.addDependency(node, dep);
-			}
-		}
-	}
-}
-
-export async function findGraph(filePath, alreadyParsedSet = new Set()) {
-	let graph = new DepGraph();
-	let normalized = normalizeFilePath(filePath);
-	graph.addNode(filePath);
-
-	if(alreadyParsedSet.has(normalized) || !existsSync(filePath)) {
-		return graph;
-	}
-	alreadyParsedSet.add(normalized);
-
-	let contents = readFileSync(normalized, "utf8");
-	let { sources, sourcesToRecurse } = await getSources(filePath, contents);
-	for(let source of sources) {
-		if(!graph.hasNode(source)) {
-			graph.addNode(source);
-		}
-		graph.addDependency(normalized, source);
-	}
-
-	// Recurse for nested deps
-	for(let source of sourcesToRecurse) {
-		let recursedGraph = await findGraph(source, alreadyParsedSet);
-		mergeGraphs(graph, recursedGraph);
-	}
-
-	return graph;
+export async function findGraph(filePath) {
+	return findGraphEsm(filePath, {
+		parserOverride: Parser.extend(tsPlugin()),
+	});
 }
