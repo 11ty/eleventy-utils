@@ -41,11 +41,15 @@ function getImportAttributeType(attributes = []) {
 	}
 }
 
-async function getSources(filePath, contents) {
+async function getSources(filePath, contents, options = {}) {
+	let { parserOverride } = Object.assign({}, options);
 	let sources = new Set();
 	let sourcesToRecurse = new Set();
 
-	let ast = acorn.parse(contents, {sourceType: "module", ecmaVersion: "latest"});
+	let ast = (parserOverride || acorn).parse(contents, {
+		sourceType: "module",
+		ecmaVersion: "latest",
+	});
 
 	for(let node of ast.body) {
 		if(node.type === "ImportDeclaration" && isNonBareSpecifier(node.source.value)) {
@@ -70,21 +74,32 @@ async function getSources(filePath, contents) {
 	}
 }
 
-async function find(filePath, alreadyParsedSet = new Set()) {
+// second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
+async function find(filePath, options = {}) {
+	if(options instanceof Set) {
+		options = {
+			alreadyParsedSet: options
+		};
+	}
+
+	if(!options.alreadyParsedSet) {
+		options.alreadyParsedSet = new Set();
+	}
+
 	// TODO add a cache here
 	// Unfortunately we need to read the entire file, imports need to be at the top level but they can be anywhere 🫠
 	let normalized = normalizeFilePath(filePath);
-	if(alreadyParsedSet.has(normalized) || !existsSync(filePath)) {
+	if(options.alreadyParsedSet.has(normalized) || !existsSync(filePath)) {
 		return [];
 	}
-	alreadyParsedSet.add(normalized);
+	options.alreadyParsedSet.add(normalized);
 
 	let contents = readFileSync(normalized, { encoding: 'utf8' });
-	let { sources, sourcesToRecurse } = await getSources(filePath, contents);
+	let { sources, sourcesToRecurse } = await getSources(filePath, contents, options);
 
 	// Recurse for nested deps
 	for(let source of sourcesToRecurse) {
-		let s = await find(source, alreadyParsedSet);
+		let s = await find(source, options);
 		for(let p of s) {
 			if(sources.has(p) || p === filePath) {
 				continue;
@@ -113,18 +128,28 @@ function mergeGraphs(rootGraph, ...graphs) {
 	}
 }
 
-async function findGraph(filePath, alreadyParsedSet = new Set()) {
+// second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
+async function findGraph(filePath, options = {}) {
+	if(options instanceof Set) {
+		options = {
+			alreadyParsedSet: options
+		};
+	}
+	if(!options.alreadyParsedSet) {
+		options.alreadyParsedSet = new Set();
+	}
+
 	let graph = new DepGraph();
 	let normalized = normalizeFilePath(filePath);
 	graph.addNode(filePath);
 
-	if(alreadyParsedSet.has(normalized) || !existsSync(filePath)) {
+	if(options.alreadyParsedSet.has(normalized) || !existsSync(filePath)) {
 		return graph;
 	}
-	alreadyParsedSet.add(normalized);
+	options.alreadyParsedSet.add(normalized);
 
 	let contents = readFileSync(normalized, "utf8");
-	let { sources, sourcesToRecurse } = await getSources(filePath, contents);
+	let { sources, sourcesToRecurse } = await getSources(filePath, contents, options);
 	for(let source of sources) {
 		if(!graph.hasNode(source)) {
 			graph.addNode(source);
@@ -134,7 +159,7 @@ async function findGraph(filePath, alreadyParsedSet = new Set()) {
 
 	// Recurse for nested deps
 	for(let source of sourcesToRecurse) {
-		let recursedGraph = await findGraph(source, alreadyParsedSet);
+		let recursedGraph = await findGraph(source, options);
 		mergeGraphs(graph, recursedGraph);
 	}
 

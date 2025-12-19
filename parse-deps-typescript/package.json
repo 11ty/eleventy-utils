@@ -4,7 +4,7 @@
     "access": "public"
   },
   "type": "module",
-  "version": "2.0.3",
+  "version": "1.0.0",
   "description": "Finds all external file dependencies from a TypeScript file path.",
   "main": "index.js",
   "license": "MIT",
