@@ -1,0 +1,31 @@
+{
+  "name": "@11ty/parse-deps-typescript",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "version": "2.0.3",
+  "description": "Finds all external file dependencies from a TypeScript file path.",
+  "main": "index.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root directory\" && exit 1"
+  },
+  "author": "Zach Leatherman <zach@zachleat.com> (https://zachleat.com/)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/11ty/eleventy-utils.git"
+  },
+  "bugs": "https://github.com/11ty/eleventy-utils/issues",
+  "homepage": "https://www.11ty.dev/",
+  "dependencies": {
+    "@11ty/eleventy-utils": "^2.0.7",
+    "@sveltejs/acorn-typescript": "^1.0.8",
+    "acorn": "^8.15.0",
+    "dependency-graph": "^1.0.0",
+    "normalize-path": "^3.0.0"
+  }
+}

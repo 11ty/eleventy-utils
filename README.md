@@ -2,8 +2,9 @@
 
 # 11ty Ecosystem Utilities
 
-- [`@11ty/eleventy-utils` in `utils/`](./utils/README.md)
-- [`@11ty/node-version-check` in `node-version-check/`](./node-version-check/README.md)
+- [`@11ty/eleventy-utils` in `utils/`](./utils/)
+- [`@11ty/node-version-check` in `node-version-check/`](./node-version-check/)
+- [`@11ty/parse-deps-typescript` in `parse-deps-typescript/`](./parse-deps-typescript/)
 
 ## Tests
 

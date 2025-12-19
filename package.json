@@ -2,11 +2,12 @@
 	"private": true,
 	"workspaces": [
 		"utils",
-    "node-version-check"
+		"node-version-check",
+		"parse-deps-typescript"
 	],
 	"scripts": {
-    "test": "node --test",
-    "watch": "node --test --watch"
-  },
+		"test": "node --test",
+		"watch": "node --test --watch"
+	},
 	"license": "MIT"
 }
