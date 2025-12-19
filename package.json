@@ -3,7 +3,8 @@
 	"workspaces": [
 		"utils",
 		"node-version-check",
-		"parse-deps-typescript"
+		"parse-deps-typescript",
+		"parse-deps-esm"
 	],
 	"scripts": {
 		"test": "node --test",
