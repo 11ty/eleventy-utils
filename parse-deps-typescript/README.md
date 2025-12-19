@@ -1,6 +1,6 @@
 <p align="center"><img src="https://www.11ty.dev/img/logo-github.png" alt="eleventy Logo"></p>
 
-# parse-deps-typescript
+# `@11ty/dependency-tree-typescript`
 
 Finds all external file dependencies from a TypeScript file path. Hard work done by [`@sveltejs/acorn-typescript`](https://www.npmjs.com/package/@sveltejs/acorn-typescript).
 
@@ -14,7 +14,7 @@ Finds all external file dependencies from a TypeScript file path. Hard work done
 ## Standalone Installation
 
 ```sh
-npm install @11ty/parse-deps-typescript
+npm install @11ty/dependency-tree-typescript
 ```
 
-- [`@11ty/parse-deps-typescript` on npm](https://www.npmjs.com/package/@11ty/parse-deps-typescript)
+- [`@11ty/dependency-tree-typescript` on npm](https://www.npmjs.com/package/@11ty/dependency-tree-typescript)

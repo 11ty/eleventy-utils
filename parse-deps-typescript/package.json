@@ -1,5 +1,5 @@
 {
-  "name": "@11ty/parse-deps-typescript",
+  "name": "@11ty/dependency-tree-typescript",
   "publishConfig": {
     "access": "public"
   },
