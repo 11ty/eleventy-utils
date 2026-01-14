@@ -28,7 +28,6 @@ npm install --save-dev @11ty/dependency-tree-esm
 // if my-local-dependency.js has dependencies, it will include those too
 import "./my-local-dependency.js";
 
-
 // ignored, is a built-in
 import path from "path";
 ```
@@ -51,4 +50,19 @@ import { findGraph } from "@11ty/dependency-tree-esm";
 
 (await findGraph("./my-file.js")).overallOrder();
 // returns ["./my-local-dependency.js", "./my-file.js"]
+```
+
+With TypeScript files (experimental type stripping support in Node 22.13 and newer):
+
+```js
+import { stripTypeScriptTypes } from "node:module";
+import { find } from "@11ty/dependency-tree-esm";
+// CommonJS is fine too
+// const { find } = require("@11ty/dependency-tree-esm");
+
+// Only in Node v22.13 and newer
+await find("./my-file.ts", {
+  preprocess: (content) => stripTypeScriptTypes(content),
+});
+// returns ["./my-local-dependency.ts"]
 ```

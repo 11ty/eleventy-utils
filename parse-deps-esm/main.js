@@ -56,12 +56,19 @@ function getImportAttributeType(attributes = []) {
 }
 
 async function getSources(filePath, contents, options = {}) {
-	let { parserOverride } = Object.assign({}, options);
+	let { parserOverride, parseOptions } = Object.assign({}, options);
 	let sources = new Set();
 	let sourcesToRecurse = new Set();
 
-	let ast = (parserOverride || acorn).parse(contents, {
-		sourceType: "module",
+	if(typeof options.preprocess === "function") {
+		contents = options.preprocess(contents, { filePath });
+		if(!contents && contents !== "") {
+			throw new Error("Missing return value from the `preprocess` function option (empty string is supported).");
+		}
+	}
+
+	let ast = (parserOverride || acorn).parse(contents, Object.assign({
+		sourceType: "module", // "commonjs"
 		ecmaVersion: "latest",
 	}, parseOptions || {}));
 
