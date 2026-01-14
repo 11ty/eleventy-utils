@@ -23,6 +23,20 @@ function isNonBareSpecifier(importSource) {
 	return false;
 }
 
+function normalizeOptions(options) {
+	if(options instanceof Set) {
+		options = {
+			alreadyParsedSet: options,
+		};
+	}
+
+	if(!options.alreadyParsedSet) {
+		options.alreadyParsedSet = new Set();
+	}
+
+	return options;
+}
+
 function normalizeFilePath(filePath) {
 	return TemplatePath.standardizeFilePath(path.relative(".", filePath));
 }
@@ -49,7 +63,7 @@ async function getSources(filePath, contents, options = {}) {
 	let ast = (parserOverride || acorn).parse(contents, {
 		sourceType: "module",
 		ecmaVersion: "latest",
-	});
+	}, parseOptions || {}));
 
 	for(let node of ast.body) {
 		if(node.type === "ImportDeclaration" && isNonBareSpecifier(node.source.value)) {
@@ -76,15 +90,7 @@ async function getSources(filePath, contents, options = {}) {
 
 // second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
 async function find(filePath, options = {}) {
-	if(options instanceof Set) {
-		options = {
-			alreadyParsedSet: options
-		};
-	}
-
-	if(!options.alreadyParsedSet) {
-		options.alreadyParsedSet = new Set();
-	}
+	options = normalizeOptions(options);
 
 	// TODO add a cache here
 	// Unfortunately we need to read the entire file, imports need to be at the top level but they can be anywhere 🫠
@@ -130,14 +136,7 @@ function mergeGraphs(rootGraph, ...graphs) {
 
 // second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
 async function findGraph(filePath, options = {}) {
-	if(options instanceof Set) {
-		options = {
-			alreadyParsedSet: options
-		};
-	}
-	if(!options.alreadyParsedSet) {
-		options.alreadyParsedSet = new Set();
-	}
+	options = normalizeOptions(options);
 
 	let graph = new DepGraph();
 	let normalized = normalizeFilePath(filePath);
