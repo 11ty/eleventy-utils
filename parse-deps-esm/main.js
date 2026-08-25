@@ -44,7 +44,14 @@ function normalizeFilePath(filePath) {
 function normalizeImportSourceToFilePath(filePath, source) {
 	let { dir } = path.parse(filePath);
 	let normalized = path.join(dir, source);
-	return normalizeFilePath(normalized);
+	let relative = normalizeFilePath(normalized);
+	// Reject imports that resolve outside of the current working directory
+	// (e.g. `import x from "../../../../etc/passwd"`), which would otherwise
+	// have their file contents read and parsed unconditionally below.
+	if(relative === ".." || relative.startsWith("../")) {
+		return false;
+	}
+	return relative;
 }
 
 function getImportAttributeType(attributes = []) {
@@ -76,7 +83,7 @@ async function getSources(filePath, contents, options = {}) {
 		if(node.type === "ImportDeclaration" && isNonBareSpecifier(node.source.value)) {
 			let importAttributeType = getImportAttributeType(node?.attributes);
 			let normalized = normalizeImportSourceToFilePath(filePath, node.source.value);
-			if(normalized !== filePath) {
+			if(normalized && normalized !== filePath) {
 				sources.add(normalized);
 
 				// Recurse typeless (JavaScript) import types only
