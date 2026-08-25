@@ -222,7 +222,7 @@ TemplatePath.startsWithSubPath = function (path, subPath) {
   path = TemplatePath.normalize(path);
   subPath = TemplatePath.normalize(subPath);
 
-  return path.startsWith(subPath);
+  return path === subPath || path.startsWith(subPath + "/");
 };
 
 /**
@@ -237,8 +237,8 @@ TemplatePath.stripLeadingSubPath = function (path, subPath) {
   path = TemplatePath.normalize(path);
   subPath = TemplatePath.normalize(subPath);
 
-  if (subPath !== "." && path.startsWith(subPath)) {
-    return path.slice(subPath.length + 1);
+  if (subPath !== "." && (path === subPath || path.startsWith(subPath + "/"))) {
+    return path === subPath ? "" : path.slice(subPath.length + 1);
   }
 
   return path;
