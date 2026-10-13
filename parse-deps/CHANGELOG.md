@@ -4,6 +4,7 @@
 
 - Merged with `@11ty/dependency-tree-esm` and `@11ty/dependency-tree-typescript`: one package for ES modules, CommonJS, `require(esm)` and TypeScript.
 - Files are read and parsed, not executed.
+- Adds JSX support for `.tsx` and `.jsx` files (#7).
 - Breaking: published as an ES module. `require()` needs Node 20.19+ or 22.12+, use `import()` on older versions.
 - Only JavaScript and TypeScript dependencies are read, a dependency that fails to parse no longer throws, and a new `root` option limits which files are read (#11).
 - Like Node, symlinks resolve to their real path, so imports inside a symlinked file resolve from its real location.

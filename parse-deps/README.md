@@ -17,9 +17,9 @@ npm install --save-dev @11ty/dependency-tree
 * Ignores Node’s built-ins (e.g. `path`) and, by default, `node_modules` packages.
 * Handles circular dependencies.
 * Like Node, symlinks resolve to (and are reported by) their real path.
-* Only reads `.js`, `.cjs`, `.mjs`, `.ts`, `.cts` and `.mts` dependencies, other files are listed but not read.
+* Only reads `.js`, `.cjs`, `.mjs`, `.jsx`, `.ts`, `.cts`, `.mts` and `.tsx` dependencies, other files are listed but not read.
 * A dependency that can’t be read or parsed is listed but not followed (only the file passed in throws).
-* Parses `.ts`, `.mts` and `.cts` files with [`@sveltejs/acorn-typescript`](https://www.npmjs.com/package/@sveltejs/acorn-typescript).
+* Parses `.ts`, `.mts`, `.cts`, `.tsx` and `.jsx` files with [`@sveltejs/acorn-typescript`](https://www.npmjs.com/package/@sveltejs/acorn-typescript).
 * Returns an empty array if the file does not exist.
 
 ## Usage

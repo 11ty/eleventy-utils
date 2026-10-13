@@ -93,3 +93,10 @@ test("CommonJS", async t => {
 		"./parse-deps/stubs/esm/empty.js",
 	]);
 });
+
+test("JSX in .jsx, issue #7", async t => {
+	assert.deepStrictEqual(await find("./parse-deps/stubs/jsx/component.jsx"), [
+		"./parse-deps/stubs/jsx/label.js",
+		"./parse-deps/stubs/jsx/child.jsx",
+	]);
+});

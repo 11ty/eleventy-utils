@@ -8,12 +8,12 @@ import normalizePath from "normalize-path";
 import { TemplatePath } from "@11ty/eleventy-utils";
 import { DepGraph } from "dependency-graph";
 
-const TYPESCRIPT_EXTENSIONS = [".ts", ".mts", ".cts"];
+const TYPESCRIPT_EXTENSIONS = [".ts", ".mts", ".cts", ".tsx"];
 
 const FUNCTION_TYPES = ["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"];
 
 // Dependencies are only read and followed when they have one of these extensions
-const JAVASCRIPT_EXTENSIONS = [".js", ".cjs", ".mjs", ...TYPESCRIPT_EXTENSIONS];
+const JAVASCRIPT_EXTENSIONS = [".js", ".cjs", ".mjs", ".jsx", ...TYPESCRIPT_EXTENSIONS];
 
 // Relative, absolute, or file: URL specifier (not a package name)
 // https://nodejs.org/docs/latest/api/esm.html#terminology
@@ -133,19 +133,25 @@ function walk(node, callback, skipFunctions) {
 	}
 }
 
-let typeScriptParser;
-function getTypeScriptParser() {
+// JSX is only enabled for .tsx and .jsx, it conflicts with `<Type>value` assertions in .ts
+let typeScriptParsers = {};
+function getTypeScriptParser(jsx) {
 	// Only loaded when a TypeScript file is found
-	typeScriptParser ??= import("@sveltejs/acorn-typescript").then(({ tsPlugin }) => acorn.Parser.extend(tsPlugin()));
-	return typeScriptParser;
+	typeScriptParsers[jsx] ??= import("@sveltejs/acorn-typescript").then(({ tsPlugin }) => acorn.Parser.extend(tsPlugin({ jsx })));
+	return typeScriptParsers[jsx];
 }
 
 async function getParser(filePath, options) {
 	if(options.parserOverride) {
 		return options.parserOverride;
 	}
-	if(TYPESCRIPT_EXTENSIONS.includes(path.extname(filePath))) {
-		return getTypeScriptParser();
+	let extension = path.extname(filePath);
+	// .jsx also uses the TypeScript parser, a superset of JavaScript with JSX support
+	if(extension === ".jsx") {
+		return getTypeScriptParser(true);
+	}
+	if(TYPESCRIPT_EXTENSIONS.includes(extension)) {
+		return getTypeScriptParser(extension === ".tsx");
 	}
 	return acorn;
 }

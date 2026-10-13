@@ -108,3 +108,10 @@ test("CommonJS require() in .cts", async t => {
 		"./parse-deps/stubs/typescript/commonjs/empty.ts",
 	]);
 });
+
+test("JSX in .tsx, issue #7", async t => {
+	assert.deepStrictEqual(await find("./parse-deps/stubs/typescript/tsx/component.tsx"), [
+		"./parse-deps/stubs/typescript/tsx/label.ts",
+		"./parse-deps/stubs/typescript/tsx/child.tsx",
+	]);
+});
