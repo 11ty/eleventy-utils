@@ -79,3 +79,17 @@ test("findGraph on nonexistent", async t => {
 	let g = await findGraph("./parse-deps-esm/stubs/does-not-exist.js");
 	assert.ok(g instanceof DepGraph);
 });
+
+test("CommonJS", async t => {
+	let results = await find("./parse-deps-esm/stubs/targets-cjs.js", {
+		// TODO this could probably parse CommonJS too?
+		// parseOptions: {
+		// 	sourceType: "commonjs",
+		// }
+	});
+
+	assert.deepStrictEqual(results, [
+		"./parse-deps-esm/stubs/commonjs.cjs",
+		"./parse-deps-esm/stubs/empty.js",
+	]);
+});

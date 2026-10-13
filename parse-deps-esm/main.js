@@ -5,6 +5,7 @@ const acorn = require("acorn");
 const normalizePath = require("normalize-path");
 const { TemplatePath } = require("@11ty/eleventy-utils");
 const { DepGraph } = require("dependency-graph");
+const { getPackagesByType } = require("@11ty/dependency-tree");
 
 // Is *not* a bare specifier (e.g. 'some-package')
 // https://nodejs.org/dist/latest-v18.x/docs/api/esm.html#terminology
@@ -55,7 +56,24 @@ function getImportAttributeType(attributes = []) {
 	}
 }
 
+// Note: @11ty/dependency-tree executes the file to find its `require()` dependencies (already recursive)
+function getCommonJsSources(filePath) {
+	let { commonjs, esm } = getPackagesByType(filePath, { allowNotFound: true });
+	let normalized = normalizeFilePath(filePath);
+	let esmSources = esm.map(p => normalizeFilePath(p)).filter(p => p !== normalized);
+
+	return {
+		sources: new Set([...commonjs.map(p => normalizeFilePath(p)), ...esmSources]),
+		sourcesToRecurse: new Set(esmSources),
+	};
+}
+
+// TODO add support for `require()` when node:module -> createRequire in play (or via an esm import(cjs))
 async function getSources(filePath, contents, options = {}) {
+	if(path.extname(filePath) === ".cjs") {
+		return getCommonJsSources(filePath);
+	}
+
 	let { parserOverride, parseOptions } = Object.assign({}, options);
 	let sources = new Set();
 	let sourcesToRecurse = new Set();
@@ -88,7 +106,6 @@ async function getSources(filePath, contents, options = {}) {
 		}
 	}
 
-	
 	return {
 		sources,
 		sourcesToRecurse,
