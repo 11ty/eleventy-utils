@@ -1,6 +1,6 @@
 {
   "name": "@11ty/dependency-tree",
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.2",
   "description": "Finds all local JavaScript and TypeScript dependencies (ES module imports and CommonJS require()) from a filename.",
   "main": "main.js",
   "type": "module",
