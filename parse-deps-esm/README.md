@@ -2,7 +2,7 @@
 
 Returns an unordered array of local paths to dependencies of a Node ES module JavaScript file.
 
-* See also: [`@11ty/dependency-tree`](https://github.com/11ty/eleventy-dependency-tree) for the CommonJS version.
+* See also: [`@11ty/dependency-tree`](https://github.com/11ty/eleventy-utils/tree/main/parse-deps-commonjs) for the CommonJS version.
 * See also: [`@11ty/dependency-tree-typescript`](https://github.com/11ty/eleventy-utils/tree/main/parse-deps-typescript) for the TypeScript version.
 
 This is used by Eleventy to find dependencies of a JavaScript file to watch for changes to re-run Eleventy’s build.
