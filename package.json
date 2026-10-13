@@ -4,7 +4,6 @@
 		"utils",
 		"node-version-check",
 		"parse-deps-typescript",
-		"parse-deps-esm",
 		"parse-deps-commonjs"
 	],
 	"scripts": {

@@ -1,5 +1,14 @@
 # Changelog
 
+## v5.0.0
+
+- Merged with `@11ty/dependency-tree-esm`: one package for ES modules, CommonJS and `require(esm)`.
+- Files are read and parsed, not executed.
+- Breaking: the default export is replaced by async `find`, `findGraph` and `mergeGraphs` exports.
+- Breaking: nonexistent files return an empty array (`allowNotFound` removed).
+- Breaking: removed `getPackagesByType`, `getNodeModuleName` and the `nodeModuleNamesOnly` option.
+- `require()` calls built from variables are no longer found.
+
 ## v4.0.0
 
 - Upgrade major dep `@11ty/eleventy-utils@2` with **Node 18+** minimum bump

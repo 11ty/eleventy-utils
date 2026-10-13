@@ -104,3 +104,17 @@ test("findGraph on nonexistent", TEST_OPTIONS, async t => {
 	let g = await findGraph("./parse-deps-typescript/stubs/does-not-exist.ts");
 	assert.strictEqual(g instanceof DepGraph, true);
 });
+
+test("CommonJS require() in .ts", TEST_OPTIONS, async t => {
+	assert.deepStrictEqual(await find("./parse-deps-typescript/stubs/commonjs/typescript.ts"), [
+		"./parse-deps-typescript/stubs/commonjs/simple2.js",
+		"./parse-deps-typescript/stubs/commonjs/empty.ts",
+	]);
+});
+
+test("CommonJS require() in .cts", TEST_OPTIONS, async t => {
+	assert.deepStrictEqual(await find("./parse-deps-typescript/stubs/commonjs/typescript.cts"), [
+		"./parse-deps-typescript/stubs/commonjs/simple2.js",
+		"./parse-deps-typescript/stubs/commonjs/empty.ts",
+	]);
+});

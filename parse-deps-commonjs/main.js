@@ -1,157 +1,289 @@
 const path = require("node:path");
+const { readFileSync, statSync } = require("node:fs");
+const { createRequire, isBuiltin } = require("node:module");
+const { fileURLToPath } = require("node:url");
+
+const acorn = require("acorn");
+const normalizePath = require("normalize-path");
 const { TemplatePath } = require("@11ty/eleventy-utils");
+const { DepGraph } = require("dependency-graph");
 
-function getAbsolutePath(filename) {
-  let normalizedFilename = path.normalize(filename); // removes dot slash
-  let hasDotSlash = filename.startsWith("./");
-  return hasDotSlash ? path.join(path.resolve("."), normalizedFilename) : normalizedFilename;
+// require()’d files with these extensions have no dependencies
+const NO_RECURSE_EXTENSIONS = [".json", ".node"];
+
+// Relative, absolute, or file: URL specifier (not a package name)
+// https://nodejs.org/docs/latest/api/esm.html#terminology
+function isPathSpecifier(specifier) {
+	// Change \\ to / on Windows
+	let normalized = normalizePath(specifier);
+	return normalized === "." || normalized === ".." || normalized.startsWith("./") || normalized.startsWith("../") || normalized.startsWith("file:") || path.isAbsolute(specifier);
 }
 
-function getRelativePath(filename) {
-  let normalizedFilename = path.normalize(filename); // removes dot slash
-  let workingDirectory = path.resolve(".");
-  let result = "./" + (normalizedFilename.startsWith(workingDirectory) ? normalizedFilename.substr(workingDirectory.length + 1) : normalizedFilename);
-  return result;
+function getPackageName(specifier) {
+	let [first, second] = specifier.split("/");
+	return first.startsWith("@") ? `${first}/${second}` : first;
 }
 
-function getNodeModuleName(filename) {
-  let foundNodeModules = false;
-  let moduleName = [];
+function normalizeOptions(options) {
+	if(options instanceof Set) {
+		options = {
+			alreadyParsedSet: options,
+		};
+	}
 
-  let s = filename.split(path.sep);
-  for(let entry of s) {
-    if(entry === '.pnpm') {
-      foundNodeModules = false;
-    }
+	if(!options.alreadyParsedSet) {
+		options.alreadyParsedSet = new Set();
+	}
 
-    if(foundNodeModules) {
-      moduleName.push(entry);
-      if(!entry.startsWith("@")) {
-        return moduleName.join("/");
-      }
-    }
+	if(!options.nodeModuleNames) {
+		options.nodeModuleNames = "exclude"; // also "include" or "only"
+	}
 
-    if(entry === "node_modules") {
-      foundNodeModules = true;
-    }
-  }
-
-  return false;
+	return options;
 }
 
-/* unordered */
-function getDependenciesFor(filename, avoidCircular, optionsArg = {}) {
-  // backwards compatibility with `nodeModuleNamesOnly` boolean option
-  // Using `nodeModuleNames` property moving forward
-  if(("nodeModuleNamesOnly" in optionsArg) && !("nodeModuleNames" in optionsArg)) {
-    if(optionsArg.nodeModuleNamesOnly === true) {
-      optionsArg.nodeModuleNames = "only";
-    }
-    if(optionsArg.nodeModuleNamesOnly === false) {
-      optionsArg.nodeModuleNames = "exclude";
-    }
-  }
-
-  let options = Object.assign({
-    allowNotFound: false,
-    nodeModuleNames: "exclude", // also "include" or "only"
-  }, optionsArg);
-  let absoluteFilename = getAbsolutePath(filename);
-  let modules = new Set();
-
-  try {
-    let res = require(absoluteFilename);
-    if(res[Symbol.toStringTag] === "Module" || res.__esModule) {
-      modules.add(filename);
-    }
-  } catch(e) {
-    if(e.code === "MODULE_NOT_FOUND" && options.allowNotFound) {
-      // do nothing
-    } else {
-      throw e;
-    }
-  }
-
-
-  let mod;
-  for(let entry in require.cache) {
-    if(entry === absoluteFilename) {
-      mod = require.cache[entry];
-      break;
-    }
-  }
-
-  let dependencies = new Set();
-
-  if(!mod) {
-    if(!options.allowNotFound) {
-      throw new Error(`Could not find ${filename} in @11ty/dependency-tree`);
-    }
-  } else {
-    let relativeFilename = getRelativePath(mod.filename);
-    if(!avoidCircular) {
-      avoidCircular = {};
-    } else if(options.nodeModuleNames !== "only") {
-      dependencies.add(relativeFilename);
-    }
-
-    avoidCircular[relativeFilename] = true;
-
-    if(Array.isArray(mod.children) && mod.children.length > 0) {
-      for(let child of mod.children) {
-        let relativeChildFilename = getRelativePath(child.filename);
-        let nodeModuleName = getNodeModuleName(child.filename);
-
-        if(options.nodeModuleNames !== "exclude" && nodeModuleName) {
-          dependencies.add(nodeModuleName);
-        }
-        // Add dependencies of this dependency (not top level node_modules)
-        if(nodeModuleName === false) {
-          if(!dependencies.has(relativeChildFilename) && // avoid infinite looping with circular deps
-            !avoidCircular[relativeChildFilename] ) {
-            let { commonjs, esm } = getDependenciesFor(relativeChildFilename, avoidCircular, options);
-            for(let dependency of commonjs) {
-              dependencies.add(dependency);
-            }
-            for(let dependency of esm) {
-              modules.add(dependency);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return {
-    esm: modules,
-    commonjs: dependencies,
-  }
+function isFile(filePath) {
+	return statSync(filePath, { throwIfNoEntry: false })?.isFile() || false;
 }
 
-function normalizeList(packageSet) {
-  return Array.from( packageSet ).map(filePath => {
-    if(filePath.startsWith("./")) {
-      return TemplatePath.standardizeFilePath(filePath);
-    }
-    return filePath; // node_module name
-  })
+function normalizeFilePath(filePath) {
+	return TemplatePath.standardizeFilePath(path.relative(".", filePath));
 }
 
-function getCleanDependencyListFor(filename, options = {}) {
-  let { commonjs } = getDependenciesFor(filename, null, options);
+// ESM specifiers are exact paths
+function resolveImport(filePath, specifier) {
+	if(specifier.startsWith("file:")) {
+		return normalizeFilePath(fileURLToPath(specifier));
+	}
 
-  return normalizeList(commonjs);
+	let { dir } = path.parse(filePath);
+	return normalizeFilePath(path.resolve(dir, specifier));
 }
 
-function getCleanDependencyListByTypeFor(filename, options = {}) {
-  let { commonjs, esm } = getDependenciesFor(filename, null, options);
-
-  return {
-    commonjs: normalizeList(commonjs),
-    esm: normalizeList(esm),
-  };
+// CommonJS specifiers can omit extensions or point to a directory
+function resolveRequire(filePath, specifier) {
+	try {
+		return normalizeFilePath(createRequire(path.resolve(filePath)).resolve(specifier));
+	} catch(e) {
+		return resolveImport(filePath, specifier);
+	}
 }
 
-module.exports = getCleanDependencyListFor;
-module.exports.getPackagesByType = getCleanDependencyListByTypeFor;
-module.exports.getNodeModuleName = getNodeModuleName;
+function getImportAttributeType(attributes = []) {
+	for(let node of attributes) {
+		if(node.type === "ImportAttribute" && node.key.type === "Identifier" && node.key.name === "type") {
+			return node.value.value;
+		}
+	}
+}
+
+function getStaticString(node) {
+	if(node?.type === "Literal" && typeof node.value === "string") {
+		return node.value;
+	}
+	if(node?.type === "TemplateLiteral" && node.expressions.length === 0) {
+		return node.quasis[0].value.cooked;
+	}
+}
+
+function walk(node, callback) {
+	if(Array.isArray(node)) {
+		for(let child of node) {
+			walk(child, callback);
+		}
+		return;
+	}
+	if(!node || typeof node.type !== "string") {
+		return;
+	}
+
+	callback(node);
+
+	for(let key in node) {
+		if(node[key] && typeof node[key] === "object") {
+			walk(node[key], callback);
+		}
+	}
+}
+
+function parse(contents, options) {
+	let parser = options.parserOverride || acorn;
+	let parseOptions = Object.assign({
+		sourceType: "module",
+		ecmaVersion: "latest",
+	}, options.parseOptions);
+
+	try {
+		return parser.parse(contents, parseOptions);
+	} catch(e) {
+		if(options.parseOptions?.sourceType) {
+			throw e;
+		}
+
+		// CommonJS allows syntax that is invalid in ES modules (e.g. top-level `return`)
+		try {
+			return parser.parse(contents, Object.assign({}, parseOptions, {
+				sourceType: "script",
+				allowReturnOutsideFunction: true,
+			}));
+		} catch {
+			throw e;
+		}
+	}
+}
+
+async function getSources(filePath, contents, options = {}) {
+	let sources = new Set();
+	let sourcesToRecurse = new Set();
+	let packages = new Set();
+	let normalizedFilePath = normalizeFilePath(filePath);
+
+	if(typeof options.preprocess === "function") {
+		contents = options.preprocess(contents, { filePath });
+		if(!contents && contents !== "") {
+			throw new Error("Missing return value from the `preprocess` function option (empty string is supported).");
+		}
+	}
+
+	function add(specifier, resolver, recurse) {
+		if(isPathSpecifier(specifier)) {
+			let resolved = resolver(filePath, specifier);
+			if(resolved === normalizedFilePath) {
+				return;
+			}
+
+			sources.add(resolved);
+			if(recurse && !NO_RECURSE_EXTENSIONS.includes(path.extname(resolved))) {
+				sourcesToRecurse.add(resolved);
+			}
+		} else if(!specifier.startsWith("#") && !isBuiltin(specifier)) {
+			packages.add(getPackageName(specifier));
+		}
+	}
+
+	walk(parse(contents, options).body, node => {
+		if(["ImportDeclaration", "ExportAllDeclaration", "ExportNamedDeclaration"].includes(node.type) && node.source) {
+			// Recurse typeless (JavaScript) import types only, right now only `css` and `json` are valid but others might come later
+			add(node.source.value, resolveImport, !getImportAttributeType(node.attributes));
+		} else if(node.type === "ImportExpression") {
+			let specifier = getStaticString(node.source);
+			if(specifier !== undefined) {
+				add(specifier, resolveImport, !node.options);
+			}
+		} else if(node.type === "CallExpression" && node.callee.type === "Identifier" && node.callee.name === "require") {
+			let specifier = getStaticString(node.arguments[0]);
+			if(specifier !== undefined) {
+				add(specifier, resolveRequire, true);
+			}
+		} else if(node.type === "TSExternalModuleReference") {
+			// TypeScript `import x = require("…")`
+			let specifier = getStaticString(node.expression);
+			if(specifier !== undefined) {
+				add(specifier, resolveRequire, true);
+			}
+		}
+	});
+
+	return {
+		sources,
+		sourcesToRecurse,
+		packages,
+	};
+}
+
+async function collect(filePath, options, results) {
+	// Unfortunately we need to read the entire file, require() can be anywhere 🫠
+	let normalized = normalizeFilePath(filePath);
+	if(options.alreadyParsedSet.has(normalized) || !isFile(filePath)) {
+		return;
+	}
+	options.alreadyParsedSet.add(normalized);
+
+	let contents = readFileSync(normalized, "utf8");
+	let { sources, sourcesToRecurse, packages } = await getSources(filePath, contents, options);
+	for(let source of sources) {
+		results.sources.add(source);
+	}
+	for(let name of packages) {
+		results.packages.add(name);
+	}
+
+	// Recurse for nested deps
+	for(let source of sourcesToRecurse) {
+		await collect(source, options, results);
+	}
+}
+
+// second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
+async function find(filePath, options = {}) {
+	options = normalizeOptions(options);
+
+	let results = {
+		sources: new Set(),
+		packages: new Set(),
+	};
+	await collect(filePath, options, results);
+	results.sources.delete(normalizeFilePath(filePath));
+
+	if(options.nodeModuleNames === "only") {
+		return Array.from(results.packages);
+	}
+	if(options.nodeModuleNames === "include") {
+		return [...results.sources, ...results.packages];
+	}
+	return Array.from(results.sources);
+}
+
+function mergeGraphs(rootGraph, ...graphs) {
+	if(!(rootGraph instanceof DepGraph)) {
+		throw new Error("Incorrect type passed to mergeGraphs, expected DepGraph");
+	}
+	for(let g of graphs) {
+		for(let node of g.overallOrder()) {
+			if(!rootGraph.hasNode(node)) {
+				rootGraph.addNode(node);
+			}
+			for(let dep of g.directDependenciesOf(node)) {
+				rootGraph.addDependency(node, dep);
+			}
+		}
+	}
+}
+
+// second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
+async function findGraph(filePath, options = {}) {
+	options = normalizeOptions(options);
+
+	let graph = new DepGraph();
+	let normalized = normalizeFilePath(filePath);
+	graph.addNode(filePath);
+
+	if(options.alreadyParsedSet.has(normalized) || !isFile(filePath)) {
+		return graph;
+	}
+	options.alreadyParsedSet.add(normalized);
+
+	let contents = readFileSync(normalized, "utf8");
+	let { sources, sourcesToRecurse, packages } = await getSources(filePath, contents, options);
+	let dependencies = options.nodeModuleNames === "exclude" ? sources : [...sources, ...packages];
+	for(let source of dependencies) {
+		if(!graph.hasNode(source)) {
+			graph.addNode(source);
+		}
+		graph.addDependency(normalized, source);
+	}
+
+	// Recurse for nested deps
+	for(let source of sourcesToRecurse) {
+		let recursedGraph = await findGraph(source, options);
+		mergeGraphs(graph, recursedGraph);
+	}
+
+	return graph;
+}
+
+module.exports = {
+	find,
+	findGraph,
+	mergeGraphs,
+};

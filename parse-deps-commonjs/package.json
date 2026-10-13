@@ -1,8 +1,11 @@
 {
   "name": "@11ty/dependency-tree",
-  "version": "4.0.2",
-  "description": "Finds all JavaScript CommmonJS require() dependencies from a filename.",
+  "version": "5.0.0",
+  "description": "Finds all local JavaScript dependencies (ES module imports and CommonJS require()) from a filename.",
   "main": "main.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root directory\" && exit 1"
   },
@@ -16,12 +19,14 @@
     "url": "https://zachleat.com/"
   },
   "license": "MIT",
+  "dependencies": {
+    "@11ty/eleventy-utils": "^2.0.7",
+    "acorn": "^8.15.0",
+    "dependency-graph": "^1.0.0",
+    "normalize-path": "^3.0.0"
+  },
   "devDependencies": {
     "@sindresorhus/is": "^4.6.0",
-    "lodash": "^4.17.23",
-    "semver": "^7.7.3"
-  },
-  "dependencies": {
-    "@11ty/eleventy-utils": "^2.0.1"
+    "lodash": "^4.17.23"
   }
 }
