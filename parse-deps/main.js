@@ -8,6 +8,8 @@ const normalizePath = require("normalize-path");
 const { TemplatePath } = require("@11ty/eleventy-utils");
 const { DepGraph } = require("dependency-graph");
 
+const TYPESCRIPT_EXTENSIONS = [".ts", ".mts", ".cts"];
+
 // require()’d files with these extensions have no dependencies
 const NO_RECURSE_EXTENSIONS = [".json", ".node"];
 
@@ -119,8 +121,24 @@ function walk(node, callback) {
 	}
 }
 
-function parse(contents, options) {
-	let parser = options.parserOverride || acorn;
+let typeScriptParser;
+function getTypeScriptParser() {
+	// ESM-only package
+	typeScriptParser ??= import("@sveltejs/acorn-typescript").then(({ tsPlugin }) => acorn.Parser.extend(tsPlugin()));
+	return typeScriptParser;
+}
+
+async function getParser(filePath, options) {
+	if(options.parserOverride) {
+		return options.parserOverride;
+	}
+	if(TYPESCRIPT_EXTENSIONS.includes(path.extname(filePath))) {
+		return getTypeScriptParser();
+	}
+	return acorn;
+}
+
+function parse(contents, parser, options) {
 	let parseOptions = Object.assign({
 		sourceType: "module",
 		ecmaVersion: "latest",
@@ -174,7 +192,7 @@ async function getSources(filePath, contents, options = {}) {
 		}
 	}
 
-	walk(parse(contents, options).body, node => {
+	walk(parse(contents, await getParser(filePath, options), options).body, node => {
 		if(["ImportDeclaration", "ExportAllDeclaration", "ExportNamedDeclaration"].includes(node.type) && node.source) {
 			// Recurse typeless (JavaScript) import types only, right now only `css` and `json` are valid but others might come later
 			add(node.source.value, resolveImport, !getImportAttributeType(node.attributes));

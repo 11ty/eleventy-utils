@@ -1,8 +1,6 @@
 # `@11ty/dependency-tree`
 
-Returns an unordered array of local paths to dependencies of a JavaScript file, following ES module `import` and CommonJS `require()` in any combination (including `require(esm)`).
-
-* See also: [`@11ty/dependency-tree-typescript`](https://github.com/11ty/eleventy-utils/tree/main/parse-deps-typescript) for the TypeScript version.
+Returns an unordered array of local paths to dependencies of a JavaScript or TypeScript file, following ES module `import` and CommonJS `require()` in any combination (including `require(esm)`).
 
 This is used by Eleventy to find dependencies of a JavaScript file to watch for changes to re-run Eleventy’s build.
 
@@ -18,6 +16,7 @@ npm install --save-dev @11ty/dependency-tree
 * Finds `import`, `export … from`, `import()` and `require()` (including `createRequire`) with string specifiers.
 * Ignores Node’s built-ins (e.g. `path`) and, by default, `node_modules` packages.
 * Handles circular dependencies.
+* Parses `.ts`, `.mts` and `.cts` files with [`@sveltejs/acorn-typescript`](https://www.npmjs.com/package/@sveltejs/acorn-typescript).
 * Returns an empty array if the file does not exist.
 
 ## Usage

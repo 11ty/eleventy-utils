@@ -2,7 +2,7 @@
 
 ## v5.0.0
 
-- Merged with `@11ty/dependency-tree-esm`: one package for ES modules, CommonJS and `require(esm)`.
+- Merged with `@11ty/dependency-tree-esm` and `@11ty/dependency-tree-typescript`: one package for ES modules, CommonJS, `require(esm)` and TypeScript.
 - Files are read and parsed, not executed.
 - Results are cached per file until it changes, use `clearCache()` to clear one file or everything.
 - Breaking: the default export is replaced by async `find`, `findGraph` and `mergeGraphs` exports.
