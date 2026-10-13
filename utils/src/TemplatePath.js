@@ -211,6 +211,20 @@ TemplatePath.stripLeadingDotSlash = function (path) {
   return typeof path === "string" ? path.replace(/^\.\//, "") : path;
 };
 
+// Rest of normalized `filePath` after normalized `subPath` (whole segments only), `undefined` if it isn’t inside
+function getSubPathRemainder(filePath, subPath) {
+  if (filePath === subPath) {
+    return "";
+  }
+  if (subPath === ".") {
+    let isOutside = filePath === ".." || filePath.startsWith("../") || path.isAbsolute(filePath);
+    return isOutside ? undefined : filePath;
+  }
+
+  let prefix = subPath.endsWith("/") ? subPath : `${subPath}/`;
+  return filePath.startsWith(prefix) ? filePath.slice(prefix.length) : undefined;
+}
+
 /**
  * Determines whether a path starts with a given sub path.
  *
@@ -222,7 +236,7 @@ TemplatePath.startsWithSubPath = function (path, subPath) {
   path = TemplatePath.normalize(path);
   subPath = TemplatePath.normalize(subPath);
 
-  return path.startsWith(subPath);
+  return getSubPathRemainder(path, subPath) !== undefined;
 };
 
 /**
@@ -237,11 +251,11 @@ TemplatePath.stripLeadingSubPath = function (path, subPath) {
   path = TemplatePath.normalize(path);
   subPath = TemplatePath.normalize(subPath);
 
-  if (subPath !== "." && path.startsWith(subPath)) {
-    return path.slice(subPath.length + 1);
+  if (subPath === ".") {
+    return path;
   }
 
-  return path;
+  return getSubPathRemainder(path, subPath) ?? path;
 };
 
 /**

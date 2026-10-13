@@ -226,6 +226,33 @@ test("startsWithSubPath", (t) => {
   );
 });
 
+test("startsWithSubPath only matches whole path segments, issue #9", (t) => {
+  assert.equal(TemplatePath.startsWithSubPath("/project/_site-secrets/leak.txt", "/project/_site"), false);
+  assert.equal(TemplatePath.startsWithSubPath("src-old/foo.md", "src"), false);
+  assert.equal(TemplatePath.startsWithSubPath("/project/_site/index.html", "/project/_site"), true);
+  assert.equal(TemplatePath.startsWithSubPath("/project/_site/", "/project/_site"), true);
+  assert.equal(TemplatePath.startsWithSubPath("/project/_site", "/project/_site/"), true);
+  assert.equal(TemplatePath.startsWithSubPath("/etc/x", "/"), true);
+});
+
+test("startsWithSubPath with the current directory", (t) => {
+  assert.equal(TemplatePath.startsWithSubPath("testing/hello", "."), true);
+  assert.equal(TemplatePath.startsWithSubPath("./testing/hello", "./"), true);
+  assert.equal(TemplatePath.startsWithSubPath(".htaccess", "."), true);
+  assert.equal(TemplatePath.startsWithSubPath(".", "."), true);
+  assert.equal(TemplatePath.startsWithSubPath("../testing", "."), false);
+  assert.equal(TemplatePath.startsWithSubPath("..", "."), false);
+  assert.equal(TemplatePath.startsWithSubPath("/etc/x", "."), false);
+});
+
+test("stripLeadingSubPath only strips whole path segments, issue #9", (t) => {
+  assert.equal(TemplatePath.stripLeadingSubPath("/project/_site-secrets/leak.txt", "/project/_site"), "/project/_site-secrets/leak.txt");
+  assert.equal(TemplatePath.stripLeadingSubPath("src-old/foo.md", "src"), "src-old/foo.md");
+  assert.equal(TemplatePath.stripLeadingSubPath("/project/_site/index.html", "/project/_site"), "index.html");
+  assert.equal(TemplatePath.stripLeadingSubPath("/project/_site", "/project/_site"), "");
+  assert.equal(TemplatePath.stripLeadingSubPath("/etc/x", "/"), "etc/x");
+});
+
 test("stripLeadingSubPath", (t) => {
   assert.equal(
     TemplatePath.stripLeadingSubPath("./testing/hello", "./lskdjklfjz"),
