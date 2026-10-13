@@ -23,7 +23,7 @@
   "homepage": "https://www.11ty.dev/",
   "dependencies": {
     "@11ty/dependency-tree": "^5.0.0",
-    "@sveltejs/acorn-typescript": "^1.0.8",
-    "acorn": "^8.15.0"
+    "@sveltejs/acorn-typescript": "^1.0.13",
+    "acorn": "^8.19.0"
   }
 }
