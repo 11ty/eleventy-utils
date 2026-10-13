@@ -337,3 +337,33 @@ test("Merge with frozen array target fails", (t) => {
     assert.equal(true, true);
   }
 });
+test("__proto__ keys don’t pollute Object.prototype, issue #8", (t) => {
+	let result = Merge({}, JSON.parse(`{"__proto__":{"polluted":true},"a":{"__proto__":{"polluted":true}}}`));
+	assert.equal({}.polluted, undefined);
+	assert.equal(Object.getPrototypeOf(result), Object.prototype);
+	assert.equal(Object.getPrototypeOf(result.a), Object.prototype);
+	assert.deepEqual(Object.keys(result), ["a"]);
+});
+
+test("override:__proto__ keys don’t change the prototype, issue #8", (t) => {
+	let result = Merge({}, JSON.parse(`{"override:__proto__":{"polluted":true}}`));
+	assert.equal(Object.getPrototypeOf(result), Object.prototype);
+	assert.equal(result.polluted, undefined);
+
+	let root = Merge(JSON.parse(`{"override:__proto__":{"polluted":true}}`));
+	assert.equal(Object.getPrototypeOf(root), Object.prototype);
+	assert.equal(root.polluted, undefined);
+});
+
+test("constructor and prototype keys are merged as data, issue #8", (t) => {
+	let result = Merge({}, JSON.parse(`{"constructor":{"prototype":{"polluted":true}}}`));
+	assert.equal({}.polluted, undefined);
+	assert.deepEqual(result.constructor, { prototype: { polluted: true } });
+
+	assert.deepEqual(Merge({ prototype: { a: 1 } }, { prototype: { b: 2 } }), { prototype: { a: 1, b: 2 } });
+});
+
+test("DeepCopy ignores __proto__ keys, issue #8", (t) => {
+	DeepCopy({}, JSON.parse(`{"__proto__":{"polluted":true}}`));
+	assert.equal({}.polluted, undefined);
+});

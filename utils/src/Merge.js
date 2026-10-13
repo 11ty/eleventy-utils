@@ -5,6 +5,9 @@ const isPlainObject = require("./IsPlainObject.js");
 
 const OVERRIDE_PREFIX = "override:";
 
+// Assigning this key changes an object’s prototype (prototype pollution)
+const UNSAFE_KEY = "__proto__";
+
 function cleanKey(key, prefix) {
 	if (prefix && key.startsWith(prefix)) {
 		return key.slice(prefix.length);
@@ -41,9 +44,15 @@ function getMergedItem(target, source, prefixes = {}) {
 		if (sourcePlainObjectShortcut) {
 			for (let key in source) {
 				let overrideKey = cleanKey(key, override);
+				if (overrideKey === UNSAFE_KEY) {
+					continue;
+				}
+
+				// Inherited values (e.g. `constructor`) are never merged into
+				let targetValue = Object.hasOwn(target, key) ? target[key] : undefined;
 
 				// An error happens here if the target is frozen
-				target[overrideKey] = getMergedItem(target[key], source[key], prefixes);
+				target[overrideKey] = getMergedItem(targetValue, source[key], prefixes);
 			}
 		}
 		return target;
@@ -70,7 +79,10 @@ function Merge(target, ...sources) {
 	if (isPlainObject(target)) {
 		for (let key in target) {
 			if (key.indexOf(OVERRIDE_PREFIX) === 0) {
-				target[key.slice(OVERRIDE_PREFIX.length)] = target[key];
+				let cleanedKey = key.slice(OVERRIDE_PREFIX.length);
+				if (cleanedKey !== UNSAFE_KEY) {
+					target[cleanedKey] = target[key];
+				}
 				delete target[key];
 			}
 		}

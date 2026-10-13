@@ -16,7 +16,7 @@
  */
 
 module.exports = function (value) {
-  if (value === null || typeof value !== "object") {
+  if (value === null || typeof value !== "object" || value === Object.prototype) {
     return false;
   }
   let proto = Object.getPrototypeOf(value);

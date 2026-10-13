@@ -80,3 +80,7 @@ test("Test from lodash.itPlainObject (modified): should return `true` for object
 
   assert.equal(isPlainObject(object), true); // WARNING: lodash was false
 });
+
+test("Object.prototype is not a plain object, issue #8", (t) => {
+  assert.equal(isPlainObject(Object.prototype), false);
+});
