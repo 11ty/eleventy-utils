@@ -5,6 +5,8 @@
 - [`@11ty/eleventy-utils` in `utils/`](./utils/)
 - [`@11ty/node-version-check` in `node-version-check/`](./node-version-check/)
 - [`@11ty/dependency-tree` in `parse-deps/`](./parse-deps/)
+  - Merged into `@11ty/dependency-tree@5`: [`@11ty/dependency-tree-esm`](https://www.npmjs.com/package/@11ty/dependency-tree-esm) (previously [`11ty/eleventy-dependency-tree-esm`](https://github.com/11ty/eleventy-dependency-tree-esm))
+  - Merged into `@11ty/dependency-tree@5`: [`@11ty/dependency-tree-typescript`](https://www.npmjs.com/package/@11ty/dependency-tree-typescript)
 
 ## Tests
 
