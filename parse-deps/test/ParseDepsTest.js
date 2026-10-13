@@ -135,6 +135,32 @@ test("Nested require(), extensionless, JSON, built-ins", async t => {
 	]);
 });
 
+test("nested: false skips function bodies (CommonJS)", async t => {
+	assert.deepStrictEqual(await find(`${STUBS}/nested/entry.cjs`, { nested: false }), [
+		`${STUBS}/nested/a.cjs`,
+		`${STUBS}/nested/b.cjs`,
+		`${STUBS}/nested/c.cjs`,
+	]);
+});
+
+test("nested: false skips function bodies (ESM)", async t => {
+	assert.deepStrictEqual(await find(`${STUBS}/nested/entry.mjs`, { nested: false }), [`${STUBS}/nested/a.cjs`]);
+});
+
+test("nested defaults to true and isn’t reused from the cache when it changes", async t => {
+	let all = [
+		`${STUBS}/nested/a.cjs`,
+		`${STUBS}/nested/b.cjs`,
+		`${STUBS}/nested/c.cjs`,
+		`${STUBS}/nested/lazy-method.cjs`,
+		`${STUBS}/nested/lazy-function.cjs`,
+		`${STUBS}/nested/lazy-arrow.mjs`,
+	];
+	assert.deepStrictEqual(await find(`${STUBS}/nested/entry.cjs`), all);
+	assert.deepStrictEqual((await find(`${STUBS}/nested/entry.cjs`, { nested: false })).length, 3);
+	assert.deepStrictEqual(await find(`${STUBS}/nested/entry.cjs`, { nested: true }), all);
+});
+
 test("findGraph across module types", async t => {
 	let g = await findGraph(`${STUBS}/mixed/root.mjs`);
 	assert.ok(g instanceof DepGraph);

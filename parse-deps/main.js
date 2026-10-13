@@ -10,6 +10,8 @@ const { DepGraph } = require("dependency-graph");
 
 const TYPESCRIPT_EXTENSIONS = [".ts", ".mts", ".cts"];
 
+const FUNCTION_TYPES = ["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"];
+
 // require()’d files with these extensions have no dependencies
 const NO_RECURSE_EXTENSIONS = [".json", ".node"];
 
@@ -39,6 +41,11 @@ function normalizeOptions(options) {
 
 	if(!options.nodeModuleNames) {
 		options.nodeModuleNames = "exclude"; // also "include" or "only"
+	}
+
+	// Find require() and import() inside function bodies
+	if(options.nested === undefined) {
+		options.nested = true;
 	}
 
 	return options;
@@ -101,14 +108,14 @@ function getStaticString(node) {
 	}
 }
 
-function walk(node, callback) {
+function walk(node, callback, skipFunctions) {
 	if(Array.isArray(node)) {
 		for(let child of node) {
-			walk(child, callback);
+			walk(child, callback, skipFunctions);
 		}
 		return;
 	}
-	if(!node || typeof node.type !== "string") {
+	if(!node || typeof node.type !== "string" || skipFunctions && FUNCTION_TYPES.includes(node.type)) {
 		return;
 	}
 
@@ -116,7 +123,7 @@ function walk(node, callback) {
 
 	for(let key in node) {
 		if(node[key] && typeof node[key] === "object") {
-			walk(node[key], callback);
+			walk(node[key], callback, skipFunctions);
 		}
 	}
 }
@@ -218,7 +225,7 @@ async function getSources(filePath, contents, options = {}) {
 
 	// Static imports and exports are top-level only, skip the full walk unless require() or import() may be nested (comments count too)
 	if(contents.includes("require") || /\bimport\s*(\(|\/[*/])/.test(contents)) {
-		walk(body, visit);
+		walk(body, visit, !options.nested);
 	} else {
 		body.forEach(visit);
 	}
@@ -234,7 +241,7 @@ async function getSourcesCached(filePath, stats, options) {
 	let key = path.resolve(filePath);
 	let parseOptionsKey = JSON.stringify(options.parseOptions || {});
 	let entry = cache.get(key);
-	if(entry && entry.cwd === process.cwd() && entry.mtimeMs === stats.mtimeMs && entry.size === stats.size && entry.parserOverride === options.parserOverride && entry.preprocess === options.preprocess && entry.parseOptionsKey === parseOptionsKey) {
+	if(entry && entry.cwd === process.cwd() && entry.mtimeMs === stats.mtimeMs && entry.size === stats.size && entry.parserOverride === options.parserOverride && entry.preprocess === options.preprocess && entry.nested === options.nested && entry.parseOptionsKey === parseOptionsKey) {
 		return entry.result;
 	}
 
@@ -245,6 +252,7 @@ async function getSourcesCached(filePath, stats, options) {
 		size: stats.size,
 		parserOverride: options.parserOverride,
 		preprocess: options.preprocess,
+		nested: options.nested,
 		parseOptionsKey,
 		result,
 	});

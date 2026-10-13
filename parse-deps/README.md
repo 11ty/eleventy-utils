@@ -62,6 +62,27 @@ clearCache("./my-file.js");
 clearCache();
 ```
 
+### `nested`
+
+`require()` and `import()` inside function bodies are included by default, use `nested: false` to only find dependencies loaded when the module runs.
+
+```js
+// my-file.js
+require("./my-local-dependency.js");
+
+function later() {
+  return import("./my-lazy-dependency.js");
+}
+```
+
+```js
+await find("./my-file.js");
+// returns ["./my-local-dependency.js", "./my-lazy-dependency.js"]
+
+await find("./my-file.js", { nested: false });
+// returns ["./my-local-dependency.js"]
+```
+
 ### `nodeModuleNames`
 
 * `"exclude"` (default): `node_modules` package names are excluded.
