@@ -49,6 +49,20 @@ const { findGraph } = require("@11ty/dependency-tree");
 // returns ["./my-local-dependency.js", "./my-other-dependency.cjs", "./my-file.js"]
 ```
 
+### `clearCache`
+
+Results for each file are cached until the file changes.
+
+```js
+const { clearCache } = require("@11ty/dependency-tree");
+
+// Remove one file (e.g. after it was deleted)
+clearCache("./my-file.js");
+
+// Remove everything
+clearCache();
+```
+
 ### `nodeModuleNames`
 
 * `"exclude"` (default): `node_modules` package names are excluded.

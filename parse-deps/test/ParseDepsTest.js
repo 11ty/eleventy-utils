@@ -2,7 +2,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const { DepGraph } = require("dependency-graph");
 
-const { find, findGraph } = require("../main.js");
+const { find, findGraph, clearCache } = require("../main.js");
 
 const STUBS = "./parse-deps/stubs";
 
@@ -136,4 +136,31 @@ test("findGraph across module types", async t => {
 		`${STUBS}/mixed/entry.cjs`,
 		`${STUBS}/mixed/root.mjs`,
 	]);
+});
+
+test("clearCache", async t => {
+	let { mkdtempSync, writeFileSync, utimesSync, rmSync } = require("node:fs");
+	let path = require("node:path");
+	let dir = mkdtempSync(path.join("parse-deps", "stubs", "tmp-"));
+	t.after(() => rmSync(dir, { recursive: true, force: true }));
+
+	let file = path.join(dir, "file.js");
+	let normalizedDir = `./${dir.split(path.sep).join("/")}`;
+	let mtime = new Date("2020-01-01T00:00:00Z");
+	writeFileSync(file, `require("./a.js");`);
+	utimesSync(file, mtime, mtime);
+	assert.deepStrictEqual(await find(file), [`${normalizedDir}/a.js`]);
+
+	// Same size and modification time, so only clearing the cache picks up the change
+	writeFileSync(file, `require("./b.js");`);
+	utimesSync(file, mtime, mtime);
+	assert.deepStrictEqual(await find(file), [`${normalizedDir}/a.js`]);
+
+	clearCache(file);
+	assert.deepStrictEqual(await find(file), [`${normalizedDir}/b.js`]);
+
+	writeFileSync(file, `require("./c.js");`);
+	utimesSync(file, mtime, mtime);
+	clearCache();
+	assert.deepStrictEqual(await find(file), [`${normalizedDir}/c.js`]);
 });

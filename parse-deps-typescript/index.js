@@ -2,16 +2,19 @@ import { find as findEsm, findGraph as findGraphEsm } from "@11ty/dependency-tre
 import { Parser } from "acorn";
 import { tsPlugin } from "@sveltejs/acorn-typescript";
 
-export { mergeGraphs } from "@11ty/dependency-tree";
+export { mergeGraphs, clearCache } from "@11ty/dependency-tree";
+
+// Reused across calls so @11ty/dependency-tree can cache results
+const parserOverride = Parser.extend(tsPlugin());
 
 export async function find(filePath) {
 	return findEsm(filePath, {
-		parserOverride: Parser.extend(tsPlugin()),
+		parserOverride,
 	})
 }
 
 export async function findGraph(filePath) {
 	return findGraphEsm(filePath, {
-		parserOverride: Parser.extend(tsPlugin()),
+		parserOverride,
 	});
 }

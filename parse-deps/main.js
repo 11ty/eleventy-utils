@@ -42,8 +42,21 @@ function normalizeOptions(options) {
 	return options;
 }
 
-function isFile(filePath) {
-	return statSync(filePath, { throwIfNoEntry: false })?.isFile() || false;
+// Direct dependencies of each file, reused until the file or the parsing options change
+const cache = new Map();
+
+// Clears one file (e.g. after a deletion) or everything
+function clearCache(filePath) {
+	if(filePath) {
+		cache.delete(path.resolve(filePath));
+	} else {
+		cache.clear();
+	}
+}
+
+function getFileStats(filePath) {
+	let stats = statSync(filePath, { throwIfNoEntry: false });
+	return stats?.isFile() ? stats : undefined;
 }
 
 function normalizeFilePath(filePath) {
@@ -191,16 +204,37 @@ async function getSources(filePath, contents, options = {}) {
 	};
 }
 
+async function getSourcesCached(filePath, stats, options) {
+	let key = path.resolve(filePath);
+	let parseOptionsKey = JSON.stringify(options.parseOptions || {});
+	let entry = cache.get(key);
+	if(entry && entry.cwd === process.cwd() && entry.mtimeMs === stats.mtimeMs && entry.size === stats.size && entry.parserOverride === options.parserOverride && entry.preprocess === options.preprocess && entry.parseOptionsKey === parseOptionsKey) {
+		return entry.result;
+	}
+
+	let result = await getSources(filePath, readFileSync(filePath, "utf8"), options);
+	cache.set(key, {
+		cwd: process.cwd(),
+		mtimeMs: stats.mtimeMs,
+		size: stats.size,
+		parserOverride: options.parserOverride,
+		preprocess: options.preprocess,
+		parseOptionsKey,
+		result,
+	});
+	return result;
+}
+
 async function collect(filePath, options, results) {
 	// Unfortunately we need to read the entire file, require() can be anywhere 🫠
 	let normalized = normalizeFilePath(filePath);
-	if(options.alreadyParsedSet.has(normalized) || !isFile(filePath)) {
+	let stats = getFileStats(filePath);
+	if(options.alreadyParsedSet.has(normalized) || !stats) {
 		return;
 	}
 	options.alreadyParsedSet.add(normalized);
 
-	let contents = readFileSync(normalized, "utf8");
-	let { sources, sourcesToRecurse, packages } = await getSources(filePath, contents, options);
+	let { sources, sourcesToRecurse, packages } = await getSourcesCached(filePath, stats, options);
 	for(let source of sources) {
 		results.sources.add(source);
 	}
@@ -258,13 +292,13 @@ async function findGraph(filePath, options = {}) {
 	let normalized = normalizeFilePath(filePath);
 	graph.addNode(filePath);
 
-	if(options.alreadyParsedSet.has(normalized) || !isFile(filePath)) {
+	let stats = getFileStats(filePath);
+	if(options.alreadyParsedSet.has(normalized) || !stats) {
 		return graph;
 	}
 	options.alreadyParsedSet.add(normalized);
 
-	let contents = readFileSync(normalized, "utf8");
-	let { sources, sourcesToRecurse, packages } = await getSources(filePath, contents, options);
+	let { sources, sourcesToRecurse, packages } = await getSourcesCached(filePath, stats, options);
 	let dependencies = options.nodeModuleNames === "exclude" ? sources : [...sources, ...packages];
 	for(let source of dependencies) {
 		if(!graph.hasNode(source)) {
@@ -286,4 +320,5 @@ module.exports = {
 	find,
 	findGraph,
 	mergeGraphs,
+	clearCache,
 };
