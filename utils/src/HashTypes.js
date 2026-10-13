@@ -1,5 +1,4 @@
 const { base64UrlSafe } = require("./Url.js");
-const { isBuffer } = require("./Buffer.js");
 const sha256 = require("./lib-sha256.js");
 
 function hasNodeCryptoModule() {
@@ -72,7 +71,8 @@ class WebCryptoHash extends Hash {
 	static async toHash(...content) {
 		let encoder = new TextEncoder();
 		let input = this.mergeUint8Array(...content.map(c => {
-			if(isBuffer(c)) {
+			// Includes Node’s Buffer (a Uint8Array subclass)
+			if(c instanceof Uint8Array) {
 				return c;
 			}
 			return encoder.encode(c);
