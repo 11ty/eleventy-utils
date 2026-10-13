@@ -6,6 +6,7 @@
 - [`@11ty/node-version-check` in `node-version-check/`](./node-version-check/)
 - [`@11ty/dependency-tree-esm` in `parse-deps-esm/`](./parse-deps-esm/)
 - [`@11ty/dependency-tree-typescript` in `parse-deps-typescript/`](./parse-deps-typescript/)
+- [`@11ty/dependency-tree` in `parse-deps-commonjs/`](./parse-deps-commonjs/)
 
 ## Tests
 
