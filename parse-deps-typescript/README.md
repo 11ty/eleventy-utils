@@ -4,7 +4,7 @@
 
 Finds all external file dependencies from a TypeScript file path. Hard work done by [`@sveltejs/acorn-typescript`](https://www.npmjs.com/package/@sveltejs/acorn-typescript).
 
-* See also: [`@11ty/dependency-tree`](https://github.com/11ty/eleventy-utils/tree/main/parse-deps-commonjs) for the JavaScript version.
+* See also: [`@11ty/dependency-tree`](https://github.com/11ty/eleventy-utils/tree/main/parse-deps) for the JavaScript version.
 
 ## ➡ [Documentation](https://www.11ty.dev/docs/)
 

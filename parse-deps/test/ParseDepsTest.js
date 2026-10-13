@@ -4,7 +4,7 @@ const { DepGraph } = require("dependency-graph");
 
 const { find, findGraph } = require("../main.js");
 
-const STUBS = "./parse-deps-commonjs/stubs";
+const STUBS = "./parse-deps/stubs";
 
 test("Nonexistent", async t => {
 	assert.deepStrictEqual(await find(`${STUBS}/thisdoesnotexist.js`), []);
