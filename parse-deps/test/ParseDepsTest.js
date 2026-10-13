@@ -112,6 +112,17 @@ test("Dynamic import() with literal, computed specifiers are ignored", async t =
 	]);
 });
 
+test("Dynamic import() with a comment before the parenthesis", async t => {
+	assert.deepStrictEqual(await find(`${STUBS}/mixed/import-comment.mjs`), [
+		`${STUBS}/mixed/leaf.cjs`,
+		`${STUBS}/mixed/leaf2.cjs`,
+	]);
+});
+
+test("Dynamic import() with whitespace before the parenthesis", async t => {
+	assert.deepStrictEqual(await find(`${STUBS}/mixed/import-whitespace.mjs`), [`${STUBS}/mixed/leaf2.cjs`]);
+});
+
 test("Nested require(), extensionless, JSON, built-ins", async t => {
 	assert.deepStrictEqual(await find(`${STUBS}/mixed/nested-require.cjs`), [
 		`${STUBS}/simple2.js`,

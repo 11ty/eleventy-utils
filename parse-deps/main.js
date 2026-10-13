@@ -192,7 +192,8 @@ async function getSources(filePath, contents, options = {}) {
 		}
 	}
 
-	walk(parse(contents, await getParser(filePath, options), options).body, node => {
+	let { body } = parse(contents, await getParser(filePath, options), options);
+	let visit = node => {
 		if(["ImportDeclaration", "ExportAllDeclaration", "ExportNamedDeclaration"].includes(node.type) && node.source) {
 			// Recurse typeless (JavaScript) import types only, right now only `css` and `json` are valid but others might come later
 			add(node.source.value, resolveImport, !getImportAttributeType(node.attributes));
@@ -213,7 +214,14 @@ async function getSources(filePath, contents, options = {}) {
 				add(specifier, resolveRequire, true);
 			}
 		}
-	});
+	};
+
+	// Static imports and exports are top-level only, skip the full walk unless require() or import() may be nested (comments count too)
+	if(contents.includes("require") || /\bimport\s*(\(|\/[*/])/.test(contents)) {
+		walk(body, visit);
+	} else {
+		body.forEach(visit);
+	}
 
 	return {
 		sources,
