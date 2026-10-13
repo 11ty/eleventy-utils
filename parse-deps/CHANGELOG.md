@@ -6,6 +6,7 @@
 - Files are read and parsed, not executed.
 - Breaking: published as an ES module. `require()` needs Node 20.19+ or 22.12+, use `import()` on older versions.
 - Only JavaScript and TypeScript dependencies are read, a dependency that fails to parse no longer throws, and a new `root` option limits which files are read (#11).
+- Like Node, symlinks resolve to their real path, so imports inside a symlinked file resolve from its real location.
 - Results are cached per file until it changes, use `clearCache()` to clear one file or everything.
 - Breaking: the default export is replaced by async `find`, `findGraph` and `mergeGraphs` exports.
 - Breaking: nonexistent files return an empty array (`allowNotFound` removed).

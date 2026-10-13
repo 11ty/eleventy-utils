@@ -73,13 +73,18 @@ function normalizeFilePath(filePath) {
 }
 
 // ESM specifiers are exact paths
-function resolveImport(filePath, specifier) {
-	if(specifier.startsWith("file:")) {
-		return normalizeFilePath(fileURLToPath(specifier));
+// Like Node, symlinks resolve to their real path
+function realpathOrSelf(filePath) {
+	try {
+		return realpathSync(filePath);
+	} catch {
+		return filePath;
 	}
+}
 
-	let { dir } = path.parse(filePath);
-	return normalizeFilePath(path.resolve(dir, specifier));
+function resolveImport(filePath, specifier) {
+	let resolved = specifier.startsWith("file:") ? fileURLToPath(specifier) : path.resolve(path.dirname(filePath), specifier);
+	return normalizeFilePath(realpathOrSelf(resolved));
 }
 
 // CommonJS specifiers can omit extensions or point to a directory
@@ -175,6 +180,9 @@ async function getSources(filePath, contents, options = {}) {
 	let sourcesToRecurse = new Set();
 	let packages = new Set();
 	let normalizedFilePath = normalizeFilePath(filePath);
+	// Relative specifiers resolve from the real location of the file
+	let realFilePath = realpathOrSelf(filePath);
+	let normalizedRealFilePath = normalizeFilePath(realFilePath);
 
 	if(typeof options.preprocess === "function") {
 		contents = options.preprocess(contents, { filePath });
@@ -185,8 +193,8 @@ async function getSources(filePath, contents, options = {}) {
 
 	function add(specifier, resolver, recurse) {
 		if(isPathSpecifier(specifier)) {
-			let resolved = resolver(filePath, specifier);
-			if(resolved === normalizedFilePath) {
+			let resolved = resolver(realFilePath, specifier);
+			if(resolved === normalizedFilePath || resolved === normalizedRealFilePath) {
 				return;
 			}
 
@@ -327,6 +335,7 @@ async function find(filePath, options = {}) {
 	};
 	await collect(filePath, options, results, true);
 	results.sources.delete(normalizeFilePath(filePath));
+	results.sources.delete(normalizeFilePath(realpathOrSelf(filePath)));
 
 	if(options.nodeModuleNames === "only") {
 		return Array.from(results.packages);

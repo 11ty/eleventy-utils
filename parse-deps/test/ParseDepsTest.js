@@ -244,14 +244,18 @@ test("root stops recursion outside the directory", async t => {
 	]);
 });
 
-test("root resolves symlinks", { skip: process.platform === "win32" }, async t => {
+test("Symlinks resolve to their real path, like Node", { skip: process.platform === "win32" }, async t => {
 	let link = path.join("parse-deps", "stubs", "security", "root", "link.mjs");
 	symlinkSync(path.join("..", "outside.mjs"), link);
 	t.after(() => rmSync(link, { force: true }));
 
-	// Without root the link is read, so its own import is listed too
-	assert.ok((await find(`${STUBS}/security/root/uses-link.mjs`)).length > 1);
+	// Like Node, the link is reported by its real path and its imports resolve from there
+	assert.deepStrictEqual(await find(`${STUBS}/security/root/uses-link.mjs`), [
+		`${STUBS}/security/outside.mjs`,
+		`${STUBS}/security/outside-child.mjs`,
+	]);
+	assert.deepStrictEqual(await find(`${STUBS}/security/root/link.mjs`), [`${STUBS}/security/outside-child.mjs`]);
 
 	let root = `${STUBS}/security/root`;
-	assert.deepStrictEqual(await find(`${STUBS}/security/root/uses-link.mjs`, { root }), [`${STUBS}/security/root/link.mjs`]);
+	assert.deepStrictEqual(await find(`${STUBS}/security/root/uses-link.mjs`, { root }), [`${STUBS}/security/outside.mjs`]);
 });
