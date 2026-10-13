@@ -8,7 +8,7 @@
 
 ## Consolidated Packages
 
-- Both [`@11ty/dependency-tree-esm`](https://www.npmjs.com/package/@11ty/dependency-tree-esm) )and [`@11ty/dependency-tree-typescript`](https://www.npmjs.com/package/@11ty/dependency-tree-typescript) are now merged into one package (`@11ty/dependency-tree@5`).
+- Both [`@11ty/dependency-tree-esm`](https://www.npmjs.com/package/@11ty/dependency-tree-esm) and [`@11ty/dependency-tree-typescript`](https://www.npmjs.com/package/@11ty/dependency-tree-typescript) are now merged into one package (`@11ty/dependency-tree@5`).
 
 ## Tests
 
