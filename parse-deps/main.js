@@ -1,12 +1,12 @@
-const path = require("node:path");
-const { readFileSync, statSync } = require("node:fs");
-const { createRequire, isBuiltin } = require("node:module");
-const { fileURLToPath } = require("node:url");
+import path from "node:path";
+import { readFileSync, statSync } from "node:fs";
+import { createRequire, isBuiltin } from "node:module";
+import { fileURLToPath } from "node:url";
 
-const acorn = require("acorn");
-const normalizePath = require("normalize-path");
-const { TemplatePath } = require("@11ty/eleventy-utils");
-const { DepGraph } = require("dependency-graph");
+import * as acorn from "acorn";
+import normalizePath from "normalize-path";
+import { TemplatePath } from "@11ty/eleventy-utils";
+import { DepGraph } from "dependency-graph";
 
 const TYPESCRIPT_EXTENSIONS = [".ts", ".mts", ".cts"];
 
@@ -130,7 +130,7 @@ function walk(node, callback, skipFunctions) {
 
 let typeScriptParser;
 function getTypeScriptParser() {
-	// ESM-only package
+	// Only loaded when a TypeScript file is found
 	typeScriptParser ??= import("@sveltejs/acorn-typescript").then(({ tsPlugin }) => acorn.Parser.extend(tsPlugin()));
 	return typeScriptParser;
 }
@@ -350,7 +350,7 @@ async function findGraph(filePath, options = {}) {
 	return graph;
 }
 
-module.exports = {
+export {
 	find,
 	findGraph,
 	mergeGraphs,

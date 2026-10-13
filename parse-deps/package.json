@@ -3,6 +3,7 @@
   "version": "5.0.0",
   "description": "Finds all local JavaScript and TypeScript dependencies (ES module imports and CommonJS require()) from a filename.",
   "main": "main.js",
+  "type": "module",
   "engines": {
     "node": ">=18"
   },

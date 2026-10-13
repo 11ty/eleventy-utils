@@ -1,8 +1,8 @@
-const assert = require("node:assert/strict");
-const test = require("node:test");
+import assert from "node:assert/strict";
+import test from "node:test";
 
-const { find, findGraph } = require("../main.js");
-const { DepGraph } = require("dependency-graph");
+import { find, findGraph } from "../main.js";
+import { DepGraph } from "dependency-graph";
 
 test("Empty", async t => {
 	assert.deepStrictEqual(await find("./parse-deps/stubs/esm/empty.js"), []);

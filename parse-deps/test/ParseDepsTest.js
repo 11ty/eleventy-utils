@@ -1,8 +1,10 @@
-const assert = require("node:assert/strict");
-const test = require("node:test");
-const { DepGraph } = require("dependency-graph");
+import assert from "node:assert/strict";
+import test from "node:test";
+import { mkdtempSync, writeFileSync, utimesSync, rmSync } from "node:fs";
+import path from "node:path";
+import { DepGraph } from "dependency-graph";
 
-const { find, findGraph, clearCache } = require("../main.js");
+import { find, findGraph, clearCache } from "../main.js";
 
 const STUBS = "./parse-deps/stubs";
 
@@ -176,8 +178,6 @@ test("findGraph across module types", async t => {
 });
 
 test("clearCache", async t => {
-	let { mkdtempSync, writeFileSync, utimesSync, rmSync } = require("node:fs");
-	let path = require("node:path");
 	let dir = mkdtempSync(path.join("parse-deps", "stubs", "tmp-"));
 	t.after(() => rmSync(dir, { recursive: true, force: true }));
 

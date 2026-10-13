@@ -33,7 +33,7 @@ import path from "path";
 ```
 
 ```js
-const { find } = require("@11ty/dependency-tree");
+import { find } from "@11ty/dependency-tree";
 
 await find("./my-file.js");
 // returns ["./my-local-dependency.js", "./my-other-dependency.cjs"]
@@ -42,7 +42,7 @@ await find("./my-file.js");
 Return a [dependency-graph](https://github.com/jriecken/dependency-graph) instance:
 
 ```js
-const { findGraph } = require("@11ty/dependency-tree");
+import { findGraph } from "@11ty/dependency-tree";
 
 (await findGraph("./my-file.js")).overallOrder();
 // returns ["./my-local-dependency.js", "./my-other-dependency.cjs", "./my-file.js"]
@@ -53,7 +53,7 @@ const { findGraph } = require("@11ty/dependency-tree");
 Results for each file are cached until the file changes.
 
 ```js
-const { clearCache } = require("@11ty/dependency-tree");
+import { clearCache } from "@11ty/dependency-tree";
 
 // Remove one file (e.g. after it was deleted)
 clearCache("./my-file.js");
@@ -97,7 +97,7 @@ await find("./my-file.js", { nodeModuleNames: "only" });
 ### `preprocess` and `parserOverride`
 
 ```js
-const { find } = require("@11ty/dependency-tree");
+import { find } from "@11ty/dependency-tree";
 
 await find("./my-file.js", {
   // Transform file contents before parsing
