@@ -1,5 +1,5 @@
 import path from "node:path";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync, statSync, realpathSync } from "node:fs";
 import { createRequire, isBuiltin } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -12,8 +12,8 @@ const TYPESCRIPT_EXTENSIONS = [".ts", ".mts", ".cts"];
 
 const FUNCTION_TYPES = ["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"];
 
-// require()’d files with these extensions have no dependencies
-const NO_RECURSE_EXTENSIONS = [".json", ".node"];
+// Dependencies are only read and followed when they have one of these extensions
+const JAVASCRIPT_EXTENSIONS = [".js", ".cjs", ".mjs", ...TYPESCRIPT_EXTENSIONS];
 
 // Relative, absolute, or file: URL specifier (not a package name)
 // https://nodejs.org/docs/latest/api/esm.html#terminology
@@ -191,7 +191,7 @@ async function getSources(filePath, contents, options = {}) {
 			}
 
 			sources.add(resolved);
-			if(recurse && !NO_RECURSE_EXTENSIONS.includes(path.extname(resolved))) {
+			if(recurse) {
 				sourcesToRecurse.add(resolved);
 			}
 		} else if(!specifier.startsWith("#") && !isBuiltin(specifier)) {
@@ -259,7 +259,35 @@ async function getSourcesCached(filePath, stats, options) {
 	return result;
 }
 
-async function collect(filePath, options, results) {
+// Optionally limited to the `root` directory (symlinks resolved)
+function shouldRecurse(source, options) {
+	if(!JAVASCRIPT_EXTENSIONS.includes(path.extname(source))) {
+		return false;
+	}
+	if(!options.root) {
+		return true;
+	}
+
+	try {
+		let relative = path.relative(realpathSync(options.root), realpathSync(source));
+		return relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+	} catch {
+		return false;
+	}
+}
+
+// Only the entry file throws, a dependency that can’t be read or parsed is still listed but not followed
+async function getSourcesForDependency(filePath, stats, options, isEntry) {
+	try {
+		return await getSourcesCached(filePath, stats, options);
+	} catch(e) {
+		if(isEntry) {
+			throw e;
+		}
+	}
+}
+
+async function collect(filePath, options, results, isEntry = false) {
 	// Unfortunately we need to read the entire file, require() can be anywhere 🫠
 	let normalized = normalizeFilePath(filePath);
 	let stats = getFileStats(filePath);
@@ -268,7 +296,12 @@ async function collect(filePath, options, results) {
 	}
 	options.alreadyParsedSet.add(normalized);
 
-	let { sources, sourcesToRecurse, packages } = await getSourcesCached(filePath, stats, options);
+	let parsed = await getSourcesForDependency(filePath, stats, options, isEntry);
+	if(!parsed) {
+		return;
+	}
+
+	let { sources, sourcesToRecurse, packages } = parsed;
 	for(let source of sources) {
 		results.sources.add(source);
 	}
@@ -278,7 +311,9 @@ async function collect(filePath, options, results) {
 
 	// Recurse for nested deps
 	for(let source of sourcesToRecurse) {
-		await collect(source, options, results);
+		if(shouldRecurse(source, options)) {
+			await collect(source, options, results);
+		}
 	}
 }
 
@@ -290,7 +325,7 @@ async function find(filePath, options = {}) {
 		sources: new Set(),
 		packages: new Set(),
 	};
-	await collect(filePath, options, results);
+	await collect(filePath, options, results, true);
 	results.sources.delete(normalizeFilePath(filePath));
 
 	if(options.nodeModuleNames === "only") {
@@ -318,10 +353,7 @@ function mergeGraphs(rootGraph, ...graphs) {
 	}
 }
 
-// second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
-async function findGraph(filePath, options = {}) {
-	options = normalizeOptions(options);
-
+async function collectGraph(filePath, options, isEntry = false) {
 	let graph = new DepGraph();
 	let normalized = normalizeFilePath(filePath);
 	graph.addNode(filePath);
@@ -332,7 +364,12 @@ async function findGraph(filePath, options = {}) {
 	}
 	options.alreadyParsedSet.add(normalized);
 
-	let { sources, sourcesToRecurse, packages } = await getSourcesCached(filePath, stats, options);
+	let parsed = await getSourcesForDependency(filePath, stats, options, isEntry);
+	if(!parsed) {
+		return graph;
+	}
+
+	let { sources, sourcesToRecurse, packages } = parsed;
 	let dependencies = options.nodeModuleNames === "exclude" ? sources : [...sources, ...packages];
 	for(let source of dependencies) {
 		if(!graph.hasNode(source)) {
@@ -343,11 +380,17 @@ async function findGraph(filePath, options = {}) {
 
 	// Recurse for nested deps
 	for(let source of sourcesToRecurse) {
-		let recursedGraph = await findGraph(source, options);
-		mergeGraphs(graph, recursedGraph);
+		if(shouldRecurse(source, options)) {
+			mergeGraphs(graph, await collectGraph(source, options));
+		}
 	}
 
 	return graph;
+}
+
+// second argument used to be `alreadyParsedSet = new Set()`, keep that backwards compat
+async function findGraph(filePath, options = {}) {
+	return collectGraph(filePath, normalizeOptions(options), true);
 }
 
 export {

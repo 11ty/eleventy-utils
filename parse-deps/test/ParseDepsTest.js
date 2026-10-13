@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtempSync, writeFileSync, utimesSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, utimesSync, rmSync, symlinkSync } from "node:fs";
 import path from "node:path";
 import { DepGraph } from "dependency-graph";
 
@@ -200,4 +200,58 @@ test("clearCache", async t => {
 	utimesSync(file, mtime, mtime);
 	clearCache();
 	assert.deepStrictEqual(await find(file), [`${normalizedDir}/c.js`]);
+});
+
+test("Non-JavaScript dependencies are listed but not read", async t => {
+	let results = await find(`${STUBS}/security/entry.mjs`);
+	assert.ok(results.includes(`${STUBS}/security/secret.env`));
+	assert.ok(!results.includes(`${STUBS}/security/should-not-appear.js`));
+});
+
+test("A dependency that fails to parse is listed but not followed", async t => {
+	assert.deepStrictEqual(await find(`${STUBS}/security/entry.mjs`), [
+		`${STUBS}/security/secret.env`,
+		`${STUBS}/security/broken.js`,
+		`${STUBS}/security/ok.js`,
+		`${STUBS}/security/ok-child.js`,
+	]);
+
+	let g = await findGraph(`${STUBS}/security/entry.mjs`);
+	assert.deepStrictEqual(g.directDependenciesOf(`${STUBS}/security/entry.mjs`), [
+		`${STUBS}/security/secret.env`,
+		`${STUBS}/security/broken.js`,
+		`${STUBS}/security/ok.js`,
+	]);
+	assert.deepStrictEqual(g.directDependenciesOf(`${STUBS}/security/broken.js`), []);
+});
+
+test("An entry file that fails to parse throws", async t => {
+	await assert.rejects(find(`${STUBS}/security/broken.js`), SyntaxError);
+	await assert.rejects(findGraph(`${STUBS}/security/broken.js`), SyntaxError);
+});
+
+test("root stops recursion outside the directory", async t => {
+	assert.deepStrictEqual(await find(`${STUBS}/security/root/inner.mjs`), [
+		`${STUBS}/security/outside.mjs`,
+		`${STUBS}/security/outside-child.mjs`,
+	]);
+
+	let root = `${STUBS}/security/root`;
+	assert.deepStrictEqual(await find(`${STUBS}/security/root/inner.mjs`, { root }), [`${STUBS}/security/outside.mjs`]);
+	assert.deepStrictEqual((await findGraph(`${STUBS}/security/root/inner.mjs`, { root })).overallOrder(), [
+		`${STUBS}/security/outside.mjs`,
+		`${STUBS}/security/root/inner.mjs`,
+	]);
+});
+
+test("root resolves symlinks", { skip: process.platform === "win32" }, async t => {
+	let link = path.join("parse-deps", "stubs", "security", "root", "link.mjs");
+	symlinkSync(path.join("..", "outside.mjs"), link);
+	t.after(() => rmSync(link, { force: true }));
+
+	// Without root the link is read, so its own import is listed too
+	assert.ok((await find(`${STUBS}/security/root/uses-link.mjs`)).length > 1);
+
+	let root = `${STUBS}/security/root`;
+	assert.deepStrictEqual(await find(`${STUBS}/security/root/uses-link.mjs`, { root }), [`${STUBS}/security/root/link.mjs`]);
 });

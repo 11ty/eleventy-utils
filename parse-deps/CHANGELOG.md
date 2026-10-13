@@ -5,6 +5,7 @@
 - Merged with `@11ty/dependency-tree-esm` and `@11ty/dependency-tree-typescript`: one package for ES modules, CommonJS, `require(esm)` and TypeScript.
 - Files are read and parsed, not executed.
 - Breaking: published as an ES module. `require()` needs Node 20.19+ or 22.12+, use `import()` on older versions.
+- Only JavaScript and TypeScript dependencies are read, a dependency that fails to parse no longer throws, and a new `root` option limits which files are read (#11).
 - Results are cached per file until it changes, use `clearCache()` to clear one file or everything.
 - Breaking: the default export is replaced by async `find`, `findGraph` and `mergeGraphs` exports.
 - Breaking: nonexistent files return an empty array (`allowNotFound` removed).
