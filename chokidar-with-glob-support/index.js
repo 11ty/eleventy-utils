@@ -7,7 +7,7 @@ class FSWatcher extends chokidar.FSWatcher {
   #targets;
 
   constructor(options = {}) {
-    let { disableGlobbing, ...chokidarOptions } = options;
+    let { disableGlobbing, nocase, ...chokidarOptions } = options;
     let targets = new WatchTargets(options);
     super({
       ...chokidarOptions,

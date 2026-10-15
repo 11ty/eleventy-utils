@@ -137,3 +137,50 @@ test("Network paths follow platform normalization", (t) => {
   assert.deepEqual(targets.add(["\\\\server\\share\\*.md"]), [path.sep === "\\" ? "//server/share" : "/server/share"]);
   assert.equal(targets.isWatched("\\\\server\\share\\a.md"), true);
 });
+
+test("nocase matches globs and paths case-insensitively", (t) => {
+  for(let nocase of [false, true]) {
+    let targets = new WatchTargets({ nocase });
+    targets.add(["src/**/*.CSS", "Public"]);
+
+    assert.equal(targets.isWatched("src/a/b.CSS"), true);
+    assert.equal(targets.isWatched("src/a/b.css"), nocase);
+    assert.equal(targets.isWatched("SRC/a/b.CSS"), nocase);
+    assert.equal(targets.isWatched("Public/a.html"), true);
+    assert.equal(targets.isWatched("public/a.html"), nocase);
+  }
+});
+
+test("nocase negations", (t) => {
+  for(let nocase of [false, true]) {
+    let targets = new WatchTargets({ nocase });
+    targets.add(["src/**/*.md", "!src/Drafts/**"]);
+
+    assert.equal(targets.isWatched("src/Drafts/a.md"), false);
+    assert.equal(targets.isWatched("src/drafts/a.md"), !nocase);
+  }
+});
+
+test("nocase ignored globs and paths", (t) => {
+  for(let nocase of [false, true]) {
+    let targets = new WatchTargets({ nocase, ignored: ["**/*.TMP", "Vendor"] });
+    targets.add(["src", "vendor"]);
+
+    assert.equal(targets.isIgnored("src/a.TMP", file), true);
+    assert.equal(targets.isIgnored("src/a.tmp", file), nocase);
+    assert.equal(targets.isIgnored("Vendor/a.js", file), true);
+    assert.equal(targets.isIgnored("vendor/a.js", file), nocase);
+  }
+});
+
+test("nocase directory traversal", (t) => {
+  for(let nocase of [false, true]) {
+    let targets = new WatchTargets({ nocase });
+    targets.add(["Docs/*/*.md", "Public/assets"]);
+
+    assert.equal(targets.isIgnored("Docs/a", dir), false);
+    assert.equal(targets.isIgnored("docs/a", dir), !nocase);
+    assert.equal(targets.isIgnored("public", dir), !nocase);
+    assert.equal(targets.isIgnored("public/assets/img", dir), !nocase);
+  }
+});

@@ -161,6 +161,22 @@ for(let mode of MODES) {
     assert.deepEqual(events, [`add ${toUnix(dir)}/moved/nested/a.md`]);
   });
 
+  for(let nocase of [false, true]) {
+    test(`${mode.name}: nocase ${nocase}`, async (t) => {
+      let { dir, events } = await watchFixture(t, dir => [`${dir}/*.CSS`], { ...mode.options, nocase });
+
+      fs.writeFileSync(path.join(dir, "a.css"), "");
+      fs.writeFileSync(path.join(dir, "b.CSS"), "");
+      await settle(events, nocase ? 2 : 1);
+
+      let expected = [`add ${toUnix(dir)}/b.CSS`];
+      if(nocase) {
+        expected.unshift(`add ${toUnix(dir)}/a.css`);
+      }
+      assert.deepEqual(events.sort(), expected);
+    });
+  }
+
   test(`${mode.name}: awaitWriteFinish`, async (t) => {
     let { dir, events } = await watchFixture(t, dir => [`${dir}/*.md`], { ...mode.options, awaitWriteFinish: { stabilityThreshold: 150, pollInterval: 25 } }, ["add", "change"]);
 

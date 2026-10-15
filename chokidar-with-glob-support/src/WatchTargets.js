@@ -1,8 +1,6 @@
 const path = require("node:path");
 const picomatch = require("picomatch");
 
-const PICOMATCH_OPTIONS = { dot: true };
-
 // Converts to forward slashes, keeping a leading `//` for network paths
 function toUnix(filePath) {
   let unix = filePath.replace(/\\/g, "/");
@@ -16,7 +14,11 @@ function normalize(filePath) {
 }
 
 // Whether `filePath` is `dir` or inside of it, `.` only contains relative paths inside of the cwd
-function isWithin(filePath, dir) {
+function isWithin(filePath, dir, nocase = false) {
+  if(nocase) {
+    filePath = filePath.toLowerCase();
+    dir = dir.toLowerCase();
+  }
   if(dir === ".") {
     return !path.isAbsolute(filePath) && filePath !== ".." && !filePath.startsWith("../");
   }
@@ -24,7 +26,7 @@ function isWithin(filePath, dir) {
 }
 
 // Splits a glob into path segments, null when a segment group contains a slash (e.g. `{a,b/c}`)
-function splitSegments(glob) {
+function splitSegments(glob, options) {
   let segments = [];
   let current = "";
   let depth = 0;
@@ -54,7 +56,7 @@ function splitSegments(glob) {
     if(segment === "**") {
       return segment;
     }
-    return segment ? picomatch(segment, PICOMATCH_OPTIONS) : (s => s === "");
+    return segment ? picomatch(segment, options) : (s => s === "");
   });
 }
 
@@ -75,8 +77,8 @@ function mayContainMatches(segments, dirPath) {
   return true;
 }
 
-function createMatcher(glob) {
-  let isMatch = picomatch(glob, PICOMATCH_OPTIONS);
+function createMatcher(glob, options) {
+  let isMatch = picomatch(glob, options);
   return filePath => isMatch(filePath);
 }
 
@@ -84,15 +86,19 @@ function createMatcher(glob) {
 module.exports = class WatchTargets {
   #cwd;
   #disableGlobbing;
+  #nocase;
+  #picomatchOptions;
   #paths = [];
   #globs = [];
   #negations = [];
   #ignoredFunctions = [];
   #ignoredMatchers = [];
 
-  constructor({ cwd, ignored, disableGlobbing } = {}) {
+  constructor({ cwd, ignored, disableGlobbing, nocase = false } = {}) {
     this.#cwd = path.resolve(cwd || ".");
     this.#disableGlobbing = Boolean(disableGlobbing);
+    this.#nocase = Boolean(nocase);
+    this.#picomatchOptions = { dot: true, nocase: this.#nocase };
     this.addIgnored(ignored);
   }
 
@@ -116,7 +122,7 @@ module.exports = class WatchTargets {
         this.#ignoredMatchers.push(filePath => matcher.test(filePath));
       } else if(typeof matcher === "string") {
         let entry = normalize(matcher);
-        this.#ignoredMatchers.push(this.#isGlob(entry) ? createMatcher(entry) : filePath => isWithin(filePath, entry));
+        this.#ignoredMatchers.push(this.#isGlob(entry) ? createMatcher(entry, this.#picomatchOptions) : filePath => isWithin(filePath, entry, this.#nocase));
       }
     }
   }
@@ -128,9 +134,9 @@ module.exports = class WatchTargets {
       entry = normalize(entry);
       let { negated, base } = picomatch.scan(entry);
       if(!this.#disableGlobbing && negated) {
-        this.#negations.push(createMatcher(entry.slice(1)));
+        this.#negations.push(createMatcher(entry.slice(1), this.#picomatchOptions));
       } else if(this.#isGlob(entry)) {
-        this.#globs.push({ glob: entry, isMatch: createMatcher(entry), segments: splitSegments(entry) });
+        this.#globs.push({ glob: entry, isMatch: createMatcher(entry, this.#picomatchOptions), segments: splitSegments(entry, this.#picomatchOptions) });
         paths.push(base || ".");
       } else {
         this.#paths.push(entry);
@@ -147,7 +153,7 @@ module.exports = class WatchTargets {
       entry = normalize(entry);
       if(this.#isGlob(entry)) {
         this.#globs = this.#globs.filter(({ glob }) => glob !== entry);
-        this.#ignoredMatchers.push(createMatcher(entry));
+        this.#ignoredMatchers.push(createMatcher(entry, this.#picomatchOptions));
       } else {
         this.#paths = this.#paths.filter(p => p !== entry);
         paths.push(entry);
@@ -161,7 +167,7 @@ module.exports = class WatchTargets {
     if(candidates.some(c => this.#negations.some(isMatch => isMatch(c)))) {
       return false;
     }
-    return candidates.some(c => this.#paths.some(p => isWithin(c, p)) || this.#globs.some(({ isMatch }) => isMatch(c)));
+    return candidates.some(c => this.#paths.some(p => isWithin(c, p, this.#nocase)) || this.#globs.some(({ isMatch }) => isMatch(c)));
   }
 
   isUserIgnored(filePath, stats) {
@@ -174,7 +180,7 @@ module.exports = class WatchTargets {
   #isTraversed(dirPath) {
     return this.#getCandidates(dirPath).some(c => {
       return c === "."
-        || this.#paths.some(p => isWithin(c, p) || isWithin(p, c))
+        || this.#paths.some(p => isWithin(c, p, this.#nocase) || isWithin(p, c, this.#nocase))
         || this.#globs.some(({ segments }) => mayContainMatches(segments, c));
     });
   }

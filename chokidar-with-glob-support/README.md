@@ -14,6 +14,7 @@ chokidar.watch(["src/**/*.css", "!src/vendor/**"], {
 - Globs and `!negations` in `watch()`, `add()`, and `unwatch()` (matched with `picomatch`, `dot: true`).
 - `ignored` accepts globs, paths (including their contents), RegExps, and functions.
 - Relative globs resolve against `cwd`; `disableGlobbing: true` treats all entries as literal paths.
+- `nocase: true` matches globs, paths, and `ignored` case-insensitively (default `false`, same as `picomatch`).
 - Directories that cannot contain matches are not traversed.
 - On macOS, `watch()` uses one recursive `fs.watch` (FSEvents) per folder instead of a file descriptor per file; opt out with `useFsEvents: false`, `usePolling`, or `depth`.
 
