@@ -3,7 +3,8 @@
 	"workspaces": [
 		"utils",
 		"node-version-check",
-		"parse-deps"
+		"parse-deps",
+		"chokidar-with-glob-support"
 	],
 	"scripts": {
 		"test": "node --test",
