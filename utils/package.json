@@ -24,7 +24,7 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"author": "Zach Leatherman <zach@zachleat.com> (https://zachleat.com/)",
+	"author": "Zach Leatherman (https://zachleat.com/)",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/11ty/eleventy-utils.git"
