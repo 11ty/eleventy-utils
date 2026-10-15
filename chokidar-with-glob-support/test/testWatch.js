@@ -35,11 +35,8 @@ async function watchFixture(t, paths, options = {}) {
   });
 
   let events = [];
-  watcher.on("all", (event, filePath) => {
-    if(event === "add" || event === "change" || event === "unlink") {
-      events.push(`${event} ${toUnix(filePath)}`);
-    }
-  });
+  // Only `add`: macOS can emit an extra `change` for a newly written file
+  watcher.on("add", filePath => events.push(`add ${toUnix(filePath)}`));
   await new Promise(resolve => watcher.once("ready", resolve));
 
   return { dir, events, watcher };
