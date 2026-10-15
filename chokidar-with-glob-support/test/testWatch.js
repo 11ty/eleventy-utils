@@ -37,9 +37,17 @@ async function watchFixture(t, paths, options = {}) {
   let events = [];
   // Only `add`: macOS can emit an extra `change` for a newly written file
   watcher.on("add", filePath => events.push(`add ${toUnix(filePath)}`));
-  await new Promise(resolve => watcher.once("ready", resolve));
+  await watcherReady(watcher);
 
   return { dir, events, watcher };
+}
+
+// macOS restarts its shared FSEvents stream for new watchers, dropping events written right after `ready`
+const WATCH_START_DELAY = 250;
+
+async function watcherReady(watcher) {
+  await new Promise(resolve => watcher.once("ready", resolve));
+  await new Promise(resolve => setTimeout(resolve, WATCH_START_DELAY));
 }
 
 async function settle(events, count) {
@@ -81,7 +89,7 @@ test("Globs relative to cwd emit relative paths", async (t) => {
 
   let events = [];
   watcher.on("add", filePath => events.push(toUnix(filePath)));
-  await new Promise(resolve => watcher.once("ready", resolve));
+  await watcherReady(watcher);
 
   fs.writeFileSync(path.join(dir, "a.md"), "");
   fs.writeFileSync(path.join(dir, "sub/a.css"), "");
@@ -95,7 +103,7 @@ test("Globs relative to cwd emit relative paths", async (t) => {
 test("Adding globs later", async (t) => {
   let { dir, events, watcher } = await watchFixture(t, dir => [`${dir}/*.css`]);
   watcher.add(`${toUnix(dir)}/sub/*.md`);
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => setTimeout(resolve, WATCH_START_DELAY));
 
   fs.writeFileSync(path.join(dir, "sub/a.md"), "");
   fs.writeFileSync(path.join(dir, "sub/a.css"), "");
