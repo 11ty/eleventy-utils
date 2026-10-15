@@ -2,7 +2,7 @@ const chokidar = require("chokidar");
 const WatchTargets = require("./src/WatchTargets.js");
 const RecursiveWatcher = require("./src/RecursiveWatcher.js");
 
-// chokidar 4 watcher with chokidar 3 glob support for watch targets and `ignored`
+// chokidar 5 watcher with chokidar 3 glob support for watch targets and `ignored`
 class FSWatcher extends chokidar.FSWatcher {
   #targets;
 

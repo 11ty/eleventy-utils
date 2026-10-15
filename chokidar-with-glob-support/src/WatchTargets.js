@@ -80,7 +80,7 @@ function createMatcher(glob) {
   return filePath => isMatch(filePath);
 }
 
-// chokidar 4 dropped glob support: watch each glob's base directory and filter with picomatch.
+// chokidar 4+ dropped glob support: watch each glob's base directory and filter with picomatch.
 module.exports = class WatchTargets {
   #cwd;
   #disableGlobbing;

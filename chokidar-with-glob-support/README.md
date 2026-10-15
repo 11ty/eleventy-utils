@@ -1,6 +1,6 @@
 # @11ty/chokidar-with-glob-support
 
-A drop-in for `chokidar@3` built on `chokidar@4`, restoring glob support for watch targets and `ignored`.
+A drop-in for `chokidar@3` built on `chokidar@5`, restoring glob support for watch targets and `ignored`.
 
 ```js
 const chokidar = require("@11ty/chokidar-with-glob-support");
@@ -17,4 +17,4 @@ chokidar.watch(["src/**/*.css", "!src/vendor/**"], {
 - Directories that cannot contain matches are not traversed.
 - On macOS, `watch()` uses one recursive `fs.watch` (FSEvents) per folder instead of a file descriptor per file; opt out with `useFsEvents: false`, `usePolling`, or `depth`.
 
-Requires Node 18 or newer.
+Requires Node 20.19 or newer.

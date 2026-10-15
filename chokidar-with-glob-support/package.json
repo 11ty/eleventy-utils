@@ -1,7 +1,7 @@
 {
 	"name": "@11ty/chokidar-with-glob-support",
 	"version": "1.1.0",
-	"description": "chokidar 4 with chokidar 3 glob support.",
+	"description": "chokidar 5 with chokidar 3 glob support.",
 	"main": "index.js",
 	"files": [
 		"index.js",
@@ -12,7 +12,7 @@
 	},
 	"license": "MIT",
 	"engines": {
-		"node": ">=18"
+		"node": ">=20.19"
 	},
 	"funding": {
 		"type": "opencollective",
@@ -38,7 +38,7 @@
 	"bugs": "https://github.com/11ty/eleventy-utils/issues",
 	"homepage": "https://www.11ty.dev/",
 	"dependencies": {
-		"chokidar": "^4.0.3",
+		"chokidar": "^5.0.0",
 		"picomatch": "^4.0.7"
 	}
 }

@@ -1,5 +1,10 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+// chokidar 5 is ESM-only and needs `require(esm)` (Node 20.19+)
+if(!process.features.require_module) {
+  test("Requires Node 20.19 or newer", { skip: true });
+  return;
+}
 const path = require("node:path");
 const { WatchTargets } = require("../");
 
