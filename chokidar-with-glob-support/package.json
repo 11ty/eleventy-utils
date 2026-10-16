@@ -3,8 +3,10 @@
 	"version": "2.0.0",
 	"description": "chokidar 5 with chokidar 3 glob support.",
 	"main": "index.js",
+	"types": "index.d.ts",
 	"files": [
 		"index.js",
+		"index.d.ts",
 		"src"
 	],
 	"scripts": {
