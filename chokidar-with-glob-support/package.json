@@ -1,6 +1,6 @@
 {
 	"name": "@11ty/chokidar-with-glob-support",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "chokidar 5 with chokidar 3 glob support.",
 	"main": "index.js",
 	"types": "index.d.ts",
