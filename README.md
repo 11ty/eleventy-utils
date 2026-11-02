@@ -7,6 +7,7 @@
 - [`@11ty/dependency-tree` in `parse-deps/`](./parse-deps/)
   - Features from both [`@11ty/dependency-tree-esm`](https://www.npmjs.com/package/@11ty/dependency-tree-esm) and [`@11ty/dependency-tree-typescript`](https://www.npmjs.com/package/@11ty/dependency-tree-typescript) are now available in `@11ty/dependency-tree` v5.0.0+.
 - [`@11ty/chokidar-with-glob-support` in `chokidar-with-glob-support/`](./chokidar-with-glob-support/)
+- [`@11ty/lodash-custom` in `lodash-custom/`](./lodash-custom/)
 
 ## Tests
 

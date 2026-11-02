@@ -4,11 +4,15 @@
 		"utils",
 		"node-version-check",
 		"parse-deps",
-		"chokidar-with-glob-support"
+		"chokidar-with-glob-support",
+		"lodash-custom"
 	],
 	"scripts": {
 		"test": "node --test",
 		"watch": "node --test --watch"
 	},
-	"license": "MIT"
+	"license": "MIT",
+	"overrides": {
+		"lodash": "4.18.1"
+	}
 }
