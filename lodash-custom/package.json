@@ -1,7 +1,7 @@
 {
 	"name": "@11ty/lodash-custom",
-	"version": "4.18.1",
-	"description": "A reduced implementation of lodash `get`, `set`, and `chunk` for use internally in Eleventy.",
+	"version": "5.0.0",
+	"description": "A forked, reduced implementation of lodash `get`, `set`, and `chunk` for use internally in Eleventy.",
 	"main": "lodash.custom.js",
 	"files": [
 		"lodash.custom.js"
