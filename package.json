@@ -11,8 +11,5 @@
 		"test": "node --test",
 		"watch": "node --test --watch"
 	},
-	"license": "MIT",
-	"overrides": {
-		"lodash": "4.18.1"
-	}
+	"license": "MIT"
 }

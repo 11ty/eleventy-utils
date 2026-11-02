@@ -1,13 +1,12 @@
 {
 	"name": "@11ty/lodash-custom",
 	"version": "4.18.1",
-	"description": "A custom, focused build of lodash exclusively for use internally in Eleventy.",
+	"description": "A reduced implementation of lodash `get`, `set`, and `chunk` for use internally in Eleventy.",
 	"main": "lodash.custom.js",
 	"files": [
 		"lodash.custom.js"
 	],
 	"scripts": {
-		"build": "npx lodash exports=node include=get,set,chunk && rm lodash.custom.min.js",
 		"test": "echo \"Error: run tests from root directory\" && exit 1"
 	},
 	"license": "MIT",
@@ -30,8 +29,5 @@
 		"url": "git+https://github.com/11ty/eleventy-utils.git"
 	},
 	"bugs": "https://github.com/11ty/eleventy-utils/issues",
-	"homepage": "https://www.11ty.dev/",
-	"devDependencies": {
-		"lodash-cli": "^4.17.5"
-	}
+	"homepage": "https://www.11ty.dev/"
 }
