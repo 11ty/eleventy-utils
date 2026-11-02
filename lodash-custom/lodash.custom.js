@@ -2,6 +2,8 @@
  * Reduced `get`, `set`, and `chunk` from Lodash <https://lodash.com/>
  * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
  * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  */
 const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
 const reIsPlainProp = /^\w*$/;
@@ -24,9 +26,9 @@ function stringToPath(string) {
 	if(string.charCodeAt(0) === 46 /* . */) {
 		result.push("");
 	}
-	string.replace(rePropName, (match, number, quote, subString) => {
+	for(let [match, number, quote, subString] of string.matchAll(rePropName)) {
 		result.push(quote ? subString.replace(reEscapeChar, "$1") : (number || match));
-	});
+	}
 
 	if(pathCacheSize === MAX_CACHE_SIZE) {
 		pathCache = Object.create(null);
@@ -124,7 +126,7 @@ function set(object, path, value) {
 		if(index !== lastIndex) {
 			newValue = isObject(objValue) ? objValue : (isIndex(path[index + 1]) ? [] : {});
 		}
-		if(!(Object.prototype.hasOwnProperty.call(nested, key) && eq(objValue, newValue)) || (newValue === undefined && !(key in nested))) {
+		if(!(Object.hasOwn(nested, key) && eq(objValue, newValue)) || (newValue === undefined && !(key in nested))) {
 			nested[key] = newValue;
 		}
 		nested = nested[key];
