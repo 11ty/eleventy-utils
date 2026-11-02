@@ -10,10 +10,12 @@ const reEscapeChar = /\\(\\)?/g;
 const reIsUint = /^(?:0|[1-9]\d*)$/;
 
 const MAX_CACHE_SIZE = 500;
-const pathCache = new Map();
+// Plain object (not a Map) to match lodash, since repeated `Map#clear` raised peak memory.
+let pathCache = Object.create(null);
+let pathCacheSize = 0;
 
 function stringToPath(string) {
-	let cached = pathCache.get(string);
+	let cached = pathCache[string];
 	if(cached) {
 		return cached;
 	}
@@ -26,10 +28,12 @@ function stringToPath(string) {
 		result.push(quote ? subString.replace(reEscapeChar, "$1") : (number || match));
 	});
 
-	if(pathCache.size === MAX_CACHE_SIZE) {
-		pathCache.clear();
+	if(pathCacheSize === MAX_CACHE_SIZE) {
+		pathCache = Object.create(null);
+		pathCacheSize = 0;
 	}
-	pathCache.set(string, result);
+	pathCache[string] = result;
+	pathCacheSize++;
 	return result;
 }
 
@@ -52,18 +56,37 @@ function toKey(value) {
 	if(typeof value === "symbol") {
 		return value;
 	}
-	return Object.is(value, -0) ? "-0" : String(value);
+	let result = String(value);
+	return result === "0" && 1 / value === -Infinity ? "-0" : result;
 }
 
-function isIndex(value) {
+function isIndex(value, length = Number.MAX_SAFE_INTEGER) {
 	let type = typeof value;
-	return (type === "number" || (type === "string" && reIsUint.test(value))) &&
-		value > -1 && value % 1 === 0 && value < Number.MAX_SAFE_INTEGER;
+	return !!length && (type === "number" || (type !== "symbol" && reIsUint.test(value))) &&
+		value > -1 && value % 1 === 0 && value < length;
 }
 
 function isObject(value) {
 	let type = typeof value;
 	return value != null && (type === "object" || type === "function");
+}
+
+// SameValueZero
+function eq(value, other) {
+	return value === other || (value !== value && other !== other);
+}
+
+// Detects calls from iteratees like `array.map(chunk)`.
+function isIterateeCall(value, index, object) {
+	if(!isObject(object)) {
+		return false;
+	}
+	let type = typeof index;
+	let isArrayLike = typeof object !== "function" && Number.isSafeInteger(object.length) && object.length >= 0;
+	if(type === "number" ? (isArrayLike && isIndex(index, object.length)) : (type === "string" && index in object)) {
+		return eq(object[index], value);
+	}
+	return false;
 }
 
 function get(object, path, defaultValue) {
@@ -96,27 +119,33 @@ function set(object, path, value) {
 			return object;
 		}
 
+		let objValue = nested[key];
 		let newValue = value;
 		if(index !== lastIndex) {
-			let objValue = nested[key];
 			newValue = isObject(objValue) ? objValue : (isIndex(path[index + 1]) ? [] : {});
 		}
-		nested[key] = newValue;
+		if(!(Object.prototype.hasOwnProperty.call(nested, key) && eq(objValue, newValue)) || (newValue === undefined && !(key in nested))) {
+			nested[key] = newValue;
+		}
 		nested = nested[key];
 	}
 	return object;
 }
 
-function chunk(array, size) {
-	size = size === undefined ? 1 : Math.max(Math.trunc(Number(size)) || 0, 0);
+function chunk(array, size, guard) {
+	if(guard ? isIterateeCall(array, size, guard) : size === undefined) {
+		size = 1;
+	} else {
+		size = Math.max(Math.trunc(Number(size)) || 0, 0);
+	}
 	let length = array == null ? 0 : array.length;
 	if(!length || size < 1) {
 		return [];
 	}
 
-	let result = [];
-	for(let index = 0; index < length; index += size) {
-		result.push(Array.prototype.slice.call(array, index, index + size));
+	let result = new Array(Math.ceil(length / size));
+	for(let index = 0, resIndex = 0; index < length; index += size) {
+		result[resIndex++] = Array.prototype.slice.call(array, index, index + size);
 	}
 	return result;
 }
