@@ -40,7 +40,7 @@
 	"bugs": "https://github.com/11ty/eleventy-utils/issues",
 	"homepage": "https://www.11ty.dev/",
 	"dependencies": {
-		"chokidar": "^5.0.0",
+		"chokidar": "^6.0.0",
 		"picomatch": "^4.0.7"
 	}
 }
