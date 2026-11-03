@@ -1,7 +1,7 @@
 {
 	"name": "@11ty/chokidar-with-glob-support",
 	"version": "2.1.1",
-	"description": "chokidar 5 with chokidar 3 glob support.",
+	"description": "chokidar 6 with chokidar 3 glob support.",
 	"main": "index.js",
 	"types": "index.d.ts",
 	"files": [
@@ -14,7 +14,7 @@
 	},
 	"license": "MIT",
 	"engines": {
-		"node": ">=20.19"
+		"node": ">=22.22"
 	},
 	"funding": {
 		"type": "opencollective",
