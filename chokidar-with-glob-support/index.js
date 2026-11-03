@@ -1,3 +1,4 @@
+const path = require("node:path");
 const chokidar = require("chokidar");
 const WatchTargets = require("./src/WatchTargets.js");
 const RecursiveWatcher = require("./src/RecursiveWatcher.js");
@@ -11,6 +12,8 @@ class FSWatcher extends chokidar.FSWatcher {
     let targets = new WatchTargets(options);
     super({
       ...chokidarOptions,
+      // chokidar joins watch targets with `cwd`, so a relative `cwd` would report paths relative to `process.cwd()` instead
+      cwd: chokidarOptions.cwd ? path.resolve(chokidarOptions.cwd) : chokidarOptions.cwd,
       ignored: (filePath, stats) => targets.isIgnored(filePath, stats),
     });
     this.#targets = targets;
