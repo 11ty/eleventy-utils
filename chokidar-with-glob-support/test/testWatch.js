@@ -106,6 +106,26 @@ for(let mode of MODES) {
     assert.deepEqual(events, ["sub/a.md"]);
   });
 
+  test(`${mode.name}: A relative cwd ignores and emits the same paths`, async (t) => {
+    let dir = fs.mkdtempSync(path.join(path.relative(".", __dirname), ".watch-"));
+    fs.mkdirSync(path.join(dir, "_site"));
+    let watcher = chokidar.watch(["**/*.md"], { ...mode.options, cwd: toUnix(dir), ignoreInitial: true, ignored: ["_site/**"] });
+    t.after(async () => {
+      await watcher.close();
+      fs.rmSync(dir, { recursive: true, force: true });
+    });
+
+    let events = [];
+    watcher.on("add", filePath => events.push(toUnix(filePath)));
+    await watcherReady(watcher);
+
+    fs.writeFileSync(path.join(dir, "_site/index.md"), "");
+    fs.writeFileSync(path.join(dir, "index.md"), "");
+    await settle(events, 1);
+
+    assert.deepEqual(events, ["index.md"]);
+  });
+
   test(`${mode.name}: Adding globs later`, async (t) => {
     let { dir, events, watcher } = await watchFixture(t, dir => [`${dir}/*.css`], mode.options);
     watcher.add(`${toUnix(dir)}/sub/*.md`);
