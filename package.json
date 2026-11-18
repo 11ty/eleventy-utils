@@ -5,7 +5,8 @@
 		"node-version-check",
 		"parse-deps",
 		"chokidar-with-glob-support",
-		"lodash-custom"
+		"lodash-custom",
+		"posthtml-match-selector"
 	],
 	"scripts": {
 		"test": "node --test",
