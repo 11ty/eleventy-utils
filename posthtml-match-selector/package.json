@@ -1,6 +1,6 @@
 {
 	"name": "@11ty/posthtml-match-selector",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Zero-dependency drop-in for posthtml-match-helper with escaped, linear-size RegExps.",
 	"main": "index.js",
 	"types": "index.d.ts",
