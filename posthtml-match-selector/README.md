@@ -14,4 +14,4 @@ tree.match(matchSelector("style,link[rel=\"stylesheet\"]"), node => node);
 - These matchers subclass `RegExp` with a custom `test()` because posthtml only accepts strings, booleans and `instanceof RegExp`.
 - `*`, combinators, pseudo-classes and other unsupported syntax throw an `Error`.
 
-Requires Node 22.22 or newer.
+Requires Node 18 or newer.

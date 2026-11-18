@@ -1,14 +1,8 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-// Requiring the ESM-only posthtml-match-helper needs Node 22.22+ (matches `engines`).
-let [major, minor] = process.versions.node.split(".").map(Number);
-if(major < 22 || major === 22 && minor < 22) {
-  test("Requires Node 22.22 or newer", { skip: true });
-  return;
-}
-const posthtml = require("posthtml");
-const { default: matchHelper } = require("posthtml-match-helper");
-const matchSelector = require("../index.js");
+import test from "node:test";
+import assert from "node:assert/strict";
+import posthtml from "posthtml";
+import matchHelper from "posthtml-match-helper";
+import matchSelector from "../index.js";
 
 const FIXTURE = `<!doctype html>
 <html lang="en-US">
@@ -135,7 +129,7 @@ test("10-class compound selector compiles fast", async () => {
   let matcher = matchSelector(`div.${classes.join(".")}`);
   assert.ok(performance.now() - start < 50);
 
-  let html = `<div class="${classes.toReversed().join(" ")} extra"></div><div class="${classes.slice(1).join(" ")}"></div>`;
+  let html = `<div class="${[...classes].reverse().join(" ")} extra"></div><div class="${classes.slice(1).join(" ")}"></div>`;
   assert.equal(await matchesHtml(matcher, html), 1);
 });
 
