@@ -7,8 +7,6 @@ updates:
       interval: weekly
     cooldown:
       default-days: 7
-    labels:
-      - "dependency-updates"
     versioning-strategy: increase
     allow:
       - dependency-type: "production"
