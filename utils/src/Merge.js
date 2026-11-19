@@ -36,6 +36,11 @@ function getMergedItem(target, source, prefixes = {}) {
 		}
 	}
 
+	// Copy-on-write: frozen targets are shared (e.g. global data) and only copied when merged into
+	if (sourcePlainObjectShortcut && Object.isFrozen(target) && isPlainObject(target)) {
+		target = Object.assign({}, target);
+	}
+
 	if (Array.isArray(target) && Array.isArray(source)) {
 		return target.concat(source);
 	}
@@ -51,7 +56,6 @@ function getMergedItem(target, source, prefixes = {}) {
 				// Inherited values (e.g. `constructor`) are never merged into
 				let targetValue = Object.hasOwn(target, key) ? target[key] : undefined;
 
-				// An error happens here if the target is frozen
 				target[overrideKey] = getMergedItem(targetValue, source[key], prefixes);
 			}
 		}
@@ -79,6 +83,10 @@ function Merge(target, ...sources) {
 	if (isPlainObject(target)) {
 		for (let key in target) {
 			if (key.indexOf(OVERRIDE_PREFIX) === 0) {
+				// Copy-on-write for a shared (frozen) root target
+				if (Object.isFrozen(target)) {
+					target = Object.assign({}, target);
+				}
 				let cleanedKey = key.slice(OVERRIDE_PREFIX.length);
 				if (cleanedKey !== UNSAFE_KEY) {
 					target[cleanedKey] = target[key];
@@ -101,5 +109,6 @@ function Merge(target, ...sources) {
 	return target;
 }
 
+Merge.DeepCopy = DeepCopy;
+
 module.exports = Merge;
-module.exports.DeepCopy = DeepCopy;

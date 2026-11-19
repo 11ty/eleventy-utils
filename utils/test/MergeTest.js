@@ -264,23 +264,92 @@ test("String does not overrides parent key with object", (t) => {
   });
 });
 
-test("Merge with frozen target object fails", () => {
-  try {
-    Merge({
-      eleventy: Object.freeze({
-        key1: "a"
-      })
-    }, {
-      eleventy: {
-        key2: "b"
-      }
-    });
+test("Merge with frozen target object copies on write", () => {
+  let frozen = Object.freeze({
+    key1: "a"
+  });
+  let result = Merge({ eleventy: frozen }, { eleventy: { key2: "b" } });
 
-    // fail on purpose
-    assert.equal(true, false);
-  } catch(e) {
-    assert.equal(true, true);
+  assert.deepEqual(result, { eleventy: { key1: "a", key2: "b" } });
+  assert.deepEqual(frozen, { key1: "a" });
+  assert.notEqual(result.eleventy, frozen);
+});
+
+function deepFreeze(obj) {
+  for (let value of Object.values(obj)) {
+    if (value && typeof value === "object") {
+      deepFreeze(value);
+    }
   }
+  return Object.freeze(obj);
+}
+
+test("Merge into deep-frozen shared data leaves it unchanged and shares untouched branches", () => {
+  let frozenNested = deepFreeze({ a: { b: 1, c: { d: 1 } }, e: { f: 1 } });
+  let result = Merge({}, frozenNested, { a: { b: 2 } });
+
+  assert.deepEqual(result, { a: { b: 2, c: { d: 1 } }, e: { f: 1 } });
+  assert.deepEqual(frozenNested, { a: { b: 1, c: { d: 1 } }, e: { f: 1 } });
+  assert.notEqual(result.a, frozenNested.a);
+  assert.equal(result.a.c, frozenNested.a.c);
+  assert.equal(result.e, frozenNested.e);
+});
+
+test("Merge into deep-frozen data copies only the levels on the merge path", () => {
+  let frozenNested = deepFreeze({
+    x: { y: { z: { value: 1, keep: { k: 1 } }, sibling: { s: 1 } }, other: { o: 1 } },
+    top: { t: 1 },
+  });
+  let result = Merge({}, frozenNested, { x: { y: { z: { value: 2 } } } });
+
+  assert.equal(result.x.y.z.value, 2);
+  assert.equal(frozenNested.x.y.z.value, 1);
+
+  assert.notEqual(result.x, frozenNested.x);
+  assert.notEqual(result.x.y, frozenNested.x.y);
+  assert.notEqual(result.x.y.z, frozenNested.x.y.z);
+
+  assert.equal(result.x.y.z.keep, frozenNested.x.y.z.keep);
+  assert.equal(result.x.y.sibling, frozenNested.x.y.sibling);
+  assert.equal(result.x.other, frozenNested.x.other);
+  assert.equal(result.top, frozenNested.top);
+});
+
+test("DeepCopy into deep-frozen data copies on write", () => {
+  let frozenNested = deepFreeze({ a: { b: 1, c: { d: 1 } }, e: { f: 1 } });
+  let result = DeepCopy({}, frozenNested, { a: { b: 2 } });
+
+  assert.deepEqual(result, { a: { b: 2, c: { d: 1 } }, e: { f: 1 } });
+  assert.deepEqual(frozenNested, { a: { b: 1, c: { d: 1 } }, e: { f: 1 } });
+  assert.notEqual(result.a, frozenNested.a);
+  assert.equal(result.a.c, frozenNested.a.c);
+  assert.equal(result.e, frozenNested.e);
+});
+
+test("Merge with frozen root target containing override: keys", () => {
+  let frozenRoot = deepFreeze({ "override:a": [1], b: { c: 1 } });
+  let result = Merge(frozenRoot, { a: [2] });
+
+  assert.deepEqual(result, { a: [1, 2], b: { c: 1 } });
+  assert.deepEqual(frozenRoot, { "override:a": [1], b: { c: 1 } });
+  assert.equal(result.b, frozenRoot.b);
+});
+
+test("Merge with frozen root target and no sources", () => {
+  let frozenRoot = deepFreeze({ "override:a": [1] });
+
+  assert.deepEqual(Merge(frozenRoot), { a: [1] });
+  assert.deepEqual(frozenRoot, { "override:a": [1] });
+});
+
+test("Merge override: prefix into deep-frozen data", () => {
+  let frozenNested = deepFreeze({ a: { tags: [1, 2], b: { c: 1 } }, e: { f: 1 } });
+  let result = Merge({}, frozenNested, { a: { "override:tags": [3] } });
+
+  assert.deepEqual(result, { a: { tags: [3], b: { c: 1 } }, e: { f: 1 } });
+  assert.deepEqual(frozenNested.a.tags, [1, 2]);
+  assert.equal(result.a.b, frozenNested.a.b);
+  assert.equal(result.e, frozenNested.e);
 });
 
 test("Merge with frozen source object (1 level deep) succeeds", (t) => {
