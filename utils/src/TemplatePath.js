@@ -268,7 +268,7 @@ TemplatePath.isDirectorySync = function (path) {
 
 /**
  * @param {String} path - A path
- * @returns {Boolean} whether `path` points to an existing directory.
+ * @returns {Promise<boolean>} whether `path` points to an existing directory.
  */
 TemplatePath.isDirectory = async function (path) {
   return new Promise((resolve) => {
@@ -309,7 +309,7 @@ TemplatePath.convertToRecursiveGlobSync = function (path) {
  * and is left unchaged.
  *
  * @param {String} path
- * @returns {String}
+ * @returns {Promise<string>}
  */
 TemplatePath.convertToRecursiveGlob = async function (path) {
   if (path === "") {

@@ -91,7 +91,7 @@ module.exports = function sha256(data) {
               buf[bp++] = (L >>> 8) & 255;
               buf[bp++] = L & 255;
               process();
-              let reply = new Uint8Array(32);
+              let reply = /** @type {Uint8Array & { hex?: () => string }} */ (new Uint8Array(32));
               reply[ 0] = h0 >>> 24; reply[ 1] = (h0 >>> 16) & 255; reply[ 2] = (h0 >>> 8) & 255; reply[ 3] = h0 & 255;
               reply[ 4] = h1 >>> 24; reply[ 5] = (h1 >>> 16) & 255; reply[ 6] = (h1 >>> 8) & 255; reply[ 7] = h1 & 255;
               reply[ 8] = h2 >>> 24; reply[ 9] = (h2 >>> 16) & 255; reply[10] = (h2 >>> 8) & 255; reply[11] = h2 & 255;

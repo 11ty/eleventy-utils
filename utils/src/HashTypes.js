@@ -133,7 +133,7 @@ class NodeCryptoHash extends Hash {
 
 class ScriptHash extends Hash {
 	static toHash(...content) {
-		let hash = sha256();
+		let hash = /** @type {{ add: (data: any) => void, digest: () => Uint8Array }} */ (sha256());
 		for(let c of content) {
 			hash.add(c);
 		}
