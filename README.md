@@ -9,6 +9,7 @@
 - [`@11ty/chokidar-with-glob-support` in `chokidar-with-glob-support/`](./chokidar-with-glob-support/)
 - [`@11ty/lodash-custom` in `lodash-custom/`](./lodash-custom/)
 - [`@11ty/posthtml-match-selector` in `posthtml-match-selector/`](./posthtml-match-selector/)
+- [`@11ty/posthtml-urls` in `posthtml-urls/`](./posthtml-urls/)
 
 ## Tests
 

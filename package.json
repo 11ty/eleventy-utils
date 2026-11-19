@@ -6,7 +6,8 @@
 		"parse-deps",
 		"chokidar-with-glob-support",
 		"lodash-custom",
-		"posthtml-match-selector"
+		"posthtml-match-selector",
+		"posthtml-urls"
 	],
 	"scripts": {
 		"test": "node --test",

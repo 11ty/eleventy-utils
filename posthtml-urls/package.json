@@ -1,0 +1,52 @@
+{
+	"name": "@11ty/posthtml-urls",
+	"version": "2.0.0",
+	"description": "PostHTML plugin for transforming URLs. A fork of posthtml/posthtml-urls.",
+	"type": "module",
+	"main": "lib/index.js",
+	"exports": {
+		".": "./lib/index.js"
+	},
+	"files": [
+		"lib"
+	],
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+	"license": "MIT",
+	"engines": {
+		"node": ">=22.12"
+	},
+	"funding": {
+		"type": "opencollective",
+		"url": "https://opencollective.com/11ty"
+	},
+	"keywords": [
+		"posthtml",
+		"posthtml-plugin",
+		"url"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"author": {
+		"name": "Zach Leatherman",
+		"url": "https://zachleat.com/"
+	},
+	"contributors": [
+		"Steven Vachon <contact@svachon.com> (https://svachon.com)"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/11ty/eleventy-utils.git"
+	},
+	"bugs": "https://github.com/11ty/eleventy-utils/issues",
+	"homepage": "https://www.11ty.dev/",
+	"dependencies": {
+		"srcset": "^5.0.3"
+	},
+	"devDependencies": {
+		"html-tags": "^5.1.0",
+		"posthtml": "^0.16.7"
+	}
+}
