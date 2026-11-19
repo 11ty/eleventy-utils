@@ -2,7 +2,7 @@ import { test as it } from "node:test";
 import assert from "node:assert/strict";
 import {DEFAULT_OPTIONS} from "../lib/defaultOptions.js";
 import plugin from "../lib/index.js";
-import posthtml from "posthtml";
+import posthtml from "@11ty/posthtml";
 
 import tags, { voidHtmlTags as voidTags } from "html-tags";
 

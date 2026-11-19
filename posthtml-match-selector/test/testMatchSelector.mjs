@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import posthtml from "posthtml";
+import posthtml from "@11ty/posthtml";
 import matchHelper from "posthtml-match-helper";
 import matchSelector from "../index.js";
 

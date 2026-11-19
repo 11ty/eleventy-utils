@@ -7,6 +7,7 @@
 		"chokidar-with-glob-support",
 		"lodash-custom",
 		"posthtml-match-selector",
+		"posthtml",
 		"posthtml-urls"
 	],
 	"scripts": {

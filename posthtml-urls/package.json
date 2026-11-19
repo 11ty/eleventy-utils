@@ -47,6 +47,6 @@
 	},
 	"devDependencies": {
 		"html-tags": "^5.1.0",
-		"posthtml": "^0.16.7"
+		"@11ty/posthtml": "*"
 	}
 }

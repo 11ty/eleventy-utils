@@ -1,0 +1,51 @@
+{
+	"name": "@11ty/posthtml",
+	"version": "1.0.0",
+	"description": "A modern, posthtml-compatible HTML processor with a built-in htmlparser2 parser and renderer.",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./index.d.ts",
+			"default": "./index.js"
+		}
+	},
+	"files": [
+		"index.js",
+		"index.d.ts",
+		"src"
+	],
+	"scripts": {
+		"test": "echo \"Error: run tests from root directory\" && exit 1"
+	},
+	"license": "MIT",
+	"engines": {
+		"node": ">=22.15"
+	},
+	"funding": {
+		"type": "opencollective",
+		"url": "https://opencollective.com/11ty"
+	},
+	"keywords": [
+		"eleventy",
+		"posthtml",
+		"html",
+		"parser",
+		"transform"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"author": {
+		"name": "Zach Leatherman",
+		"url": "https://zachleat.com/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/11ty/eleventy-utils.git"
+	},
+	"bugs": "https://github.com/11ty/eleventy-utils/issues",
+	"homepage": "https://www.11ty.dev/",
+	"dependencies": {
+		"htmlparser2": "^12.0.0"
+	}
+}
